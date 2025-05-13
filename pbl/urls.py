@@ -22,9 +22,9 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 
 urlpatterns = [
-    path('', lambda request: redirect('home/', permanent=False)),
+    path("", include("home.urls")),
     path("home/", include("home.urls")),
     path("admin/", admin.site.urls),
     path("demos/", include("demos.urls")),
-    path('project1/', include('project1.urls'))
+    path("project1/", include("project1.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
