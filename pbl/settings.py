@@ -41,6 +41,10 @@ INSTALLED_APPS = [
     "home", 
     "demos",
     "project1",
+    "project2",
+    "project3",
+    "project4",
+    "project5",
 ]
 
 MIDDLEWARE = [
@@ -108,7 +112,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/files/
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 
 # Internationalization
