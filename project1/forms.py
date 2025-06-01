@@ -18,8 +18,16 @@ class ModelTrainingForm(forms.Form):
         ('f1', 'F1 Score'),
     ]
 
-    model = forms.ChoiceField(choices=MODEL_CHOICES, label="Select Model")
-    label_column = forms.ChoiceField(label="Target Column", choices=[])  # dynamically set in view
+    model = forms.ChoiceField(
+        choices=MODEL_CHOICES,
+        label="Select Model"
+    )
+
+    label_column = forms.ChoiceField(
+        label="Target Column",
+        choices=[]  # Dynamically set in the view
+    )
+
     test_size = forms.FloatField(
         label="Test Size",
         min_value=0.1,
@@ -27,6 +35,7 @@ class ModelTrainingForm(forms.Form):
         initial=0.2,
         help_text="Fraction of data to be used for testing (e.g., 0.2 for 20%)."
     )
+
     c_values = forms.CharField(
         label="C values (comma-separated)",
         required=False,
@@ -42,4 +51,8 @@ class ModelTrainingForm(forms.Form):
         required=False,
         help_text="For Random Forest (e.g., 3,5,10)"
     )
-    metric = forms.ChoiceField(choices=METRIC_CHOICES, label="Evaluation Metric")
+
+    metric = forms.ChoiceField(
+        choices=METRIC_CHOICES,
+        label="Evaluation Metric"
+    )
