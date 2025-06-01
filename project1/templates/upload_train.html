@@ -1,115 +1,167 @@
-{% load form_tags %}
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ML Model Training</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CSV Upload & Train</title>
+<style>
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: linear-gradient(120deg, #e0f7fa, #f3e5f5);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 50px 15px;
+  }
+  .container {
+    background-color: white;
+    width: 100%;
+    max-width: 900px;
+    border-radius: 18px;
+    padding: 40px 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  h1 {
+    color: #4a148c;
+    margin-bottom: 35px;
+  }
+  form {
+    margin: 0 auto 40px auto;
+    max-width: 400px;
+    text-align: left;
+  }
+  form input, form select, form button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 20px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  form button {
+    background-color: #4caf50;
+    color: white;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  form button:hover {
+    background-color: #388e3c;
+  }
+  .visualizations {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
+  .visualizations img,
+  .visualizations .placeholder-graph {
+    width: 48%;
+    min-width: 320px;
+    height: 280px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    object-fit: cover;  /* Makes images fill the box fully */
+    background-color: transparent; /* remove purple background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #4a148c;
+  }
+  /* Responsive fallback: full width on small screens */
+  @media (max-width: 700px) {
+    .visualizations img,
+    .visualizations .placeholder-graph {
+      width: 100%;
+      min-width: unset;
+      margin-bottom: 20px;
+      height: auto; /* Let height adjust automatically */
+    }
+  }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-<div class="container my-5">
-  <h1 class="mb-4">Upload Dataset & Train Model</h1>
+  <div class="container">
+    <h1>🚀 Upload Your CSV and Train a Model</h1>
 
-  <!-- Dataset Upload -->
-  <div class="card mb-4">
-    <div class="card-header">Step 1: Upload Dataset</div>
-    <div class="card-body">
-      <form method="post" enctype="multipart/form-data" class="row g-3">
-        {% csrf_token %}
-        {{ upload_form.as_p }}
-        <button type="submit" class="btn btn-primary ms-2">Upload</button>
-      </form>
+    {% if messages %}
+      <ul class="message-list">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
-      {% if dataset_preview %}
-        <h5 class="mt-4">Dataset Preview (first 5 rows):</h5>
-        <div class="table-responsive">
-          {{ dataset_preview|safe }}
+    {% if step == 1 %}
+      <div class="form-section">
+        <h2>📁 Step 1: Upload CSV File</h2>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ upload_form.as_p }}
+          <button type="submit" name="upload_csv">Upload CSV</button>
+        </form>
+      </div>
+
+    {% elif step == 2 %}
+      <div class="form-section">
+        <h2>🎯 Step 2: Choose Target Column</h2>
+        <form method="post">
+          {% csrf_token %}
+          {{ target_form.as_p }}
+          <button type="submit" name="select_target">Next</button>
+        </form>
+      </div>
+
+    {% elif step == 3 %}
+      <div class="form-section">
+        <h2>🧠 Step 3: Select Model & Hyperparameters</h2>
+        <p><strong>Target Column:</strong> {{ target_column }}</p>
+        <form method="post">
+          {% csrf_token %}
+          {{ model_form.as_p }}
+          <button type="submit" name="train_model">Train Model</button>
+        </form>
+      </div>
+
+    {% elif step == 4 %}
+      <div class="form-section results">
+        <h2>📊 Step 4: Results & Insights</h2>
+        <p><strong>Model:</strong> {{ model_name }}</p>
+        <p><strong>Evaluation Metric:</strong> {{ metric }}</p>
+        <p><strong>Best Score:</strong> {{ results.best_score|floatformat:4 }}</p>
+
+        <div class="params-box">
+          <p><strong>Best Hyperparameters:</strong></p>
+          <ul>
+            {% for key, value in results.best_params.items %}
+              <li><code>{{ key }}</code>: {{ value }}</li>
+            {% endfor %}
+          </ul>
         </div>
-      {% endif %}
-    </div>
+
+        <h3>📈 Visualizations</h3>
+        <div class="visualizations">
+          {{ visualizations|safe }}
+        </div>
+
+        <form method="get">
+          <button type="submit" class="btn-reset">Start Over 🔄</button>
+        </form>
+      </div>
+    {% endif %}
   </div>
-
-  <!-- Model Training -->
-  {% if columns %}
-  <div class="card mb-4">
-    <div class="card-header">Step 2: Train Model</div>
-    <div class="card-body">
-      <form method="post" class="row g-3">
-        {% csrf_token %}
-        <!-- Model choice -->
-        <div class="col-md-4">
-          <label for="id_model" class="form-label">Select Model</label>
-          {{ train_form.model|add_class:"form-select" }}
-        </div>
-
-        <!-- Label column selection -->
-        <div class="col-md-4">
-          <label for="id_label_column" class="form-label">Label Column</label>
-          {{ train_form.label_column|add_class:"form-select" }}
-        </div>
-
-        <!-- Test size -->
-        <div class="col-md-4">
-          <label for="id_test_size" class="form-label">Test Set Size (0.1 - 0.5)</label>
-          {{ train_form.test_size|add_class:"form-control" }}
-        </div>
-
-        <!-- Metric -->
-        <div class="col-md-4">
-          <label for="id_metric" class="form-label">Evaluation Metric</label>
-          {{ train_form.metric|add_class:"form-select" }}
-        </div>
-
-        <!-- C value (LogReg/SVM) -->
-        <div class="col-md-4">
-          <label for="id_c_values" class="form-label">C (comma-separated, e.g. 0.1,1,10)</label>
-          {{ train_form.c_values|add_class:"form-control" }}
-          <small class="text-muted">Only for Logistic Regression / SVM</small>
-        </div>
-
-        <!-- n_estimators (Random Forest) -->
-        <div class="col-md-4">
-          <label for="id_n_estimators_values" class="form-label">n_estimators (comma-separated, e.g. 50,100,200)</label>
-          {{ train_form.n_estimators_values|add_class:"form-control" }}
-          <small class="text-muted">Only for Random Forest</small>
-        </div>
-
-        <!-- max_depth (Random Forest) -->
-        <div class="col-md-4">
-          <label for="id_max_depth_values" class="form-label">max_depth (comma-separated, e.g. 5,10,None)</label>
-          {{ train_form.max_depth_values|add_class:"form-control" }}
-          <small class="text-muted">Only for Random Forest</small>
-        </div>
-
-        <div class="col-12 mt-3">
-          <button type="submit" class="btn btn-success">Train Model</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Training Result -->
-  {% if result %}
-  <div class="alert alert-info">
-    <h4>Training Result</h4>
-    <p>{{ result }}</p>
-  </div>
-  {% endif %}
-
-  {% if errors %}
-  <div class="alert alert-danger">
-    <ul>
-      {% for error in errors %}
-      <li>{{ error }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
