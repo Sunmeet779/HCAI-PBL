@@ -2,74 +2,191 @@
 
 {%  load static %}
 
-{% block extra_css %}
-        <link rel= "stylesheet" href="{% static 'home/style.css'%}">
-{% endblock %}
+
+
 
 {% block content %}
 
-<div class="box">
-    <!-- Header -->
-    <div class="title-container">
-        <div class="title-text">
-            <h1>Human Centric</h1>
-            <h2>Artificial Intelligence</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Centric AI | Projects</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .project-card {
+            transition: all 0.3s ease;
+        }
+        
+        .wave-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            transform: rotate(180deg);
+        }
+        
+        .wave-bg svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 150px;
+        }
+        
+        .wave-bg .shape-fill {
+            fill: #3B82F6;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="text-2xl font-bold gradient-text">Human Centric AI</div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="text-gray-700 hover:text-blue-500 transition">Home</a>
+                <a href="#projects" class="text-gray-700 hover:text-blue-500 transition">Projects</a>
+                <a href="#about" class="text-gray-700 hover:text-blue-500 transition">About</a>
+            </div>
+            <button class="md:hidden text-gray-700">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
         </div>
-        <!-- Image 1 -->
-        <div id="image1">
-            <img src="{% static 'home/images/image-1.png' %}" alt="img1" style="width: 15vw;">
-        </div>
-        <!-- Neural Network GIF -->
-        <div id="nn-gif">
-            <img src="{% static 'home/images/NN2.gif' %}" alt="Neural Network GIF" style="width: 150px;">
-        </div>
-    </div>
+    </nav>
 
-    <div class="col1">
-        <div id="image2">
-            <img src="{% static 'home/images/image-2.png' %}" alt="img2" style="width: 15vw;">
+    <!-- Hero Section -->
+    <section id="home" class="relative py-16 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-6 gradient-text">Human Centric AI Projects</h1>
+            <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg ">
+                        <h3 class="font-semibold text-blue-600">{{ students.1.name }}</h3>
+                        <p class="text-sm text-gray-500 text-center ">Matr. Nr:{{ students.1.matriculation }}</p>
+                        <div class="flex space-x-3 mt-2 justify-center">
+                            <a href="https://github.com/Sunmeet779/" target="_blank" class="text-gray-700 hover:text-black">
+                                <i class="fab fa-github text-xl"></i>
+                            </a>
+                            <a href="https://linkedin.com/in/kohli5/" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                <i class="fab fa-linkedin text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-indigo-600">{{ students.0.name }}</h3>
+                        <p class="text-sm text-gray-500 text-center">Matr. Nr: {{ students.0.matriculation }}</p>
+                        <div class="flex space-x-3 mt-2 justify-center">
+                            <a href="https://github.com/san-11" target="_blank" class="text-gray-700 hover:text-black">
+                                <i class="fab fa-github text-xl"></i>
+                            </a>
+                            <a href="https://linkedin.com/in/sanika-acharya" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                <i class="fab fa-linkedin text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                Exploring the intersection of artificial intelligence and human-centered design to create meaningful solutions.
+            </p>
+            <a href="#Projects" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-300 transform hover:scale-105 shadow-lg">
+                View Projects <i class="fas fa-arrow-down ml-2"></i>
+            </a>
         </div>
-        <div id="image3">
-            <img src="{% static 'home/images/image-3.png' %}" alt="img3" style="width: 15vw;">
+        
+        <div class="wave-bg">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+            </svg>
         </div>
-    
-    <!-- Team Members -->
-    <div class="students">
-        <h1 style="color: #152c49;">Team Members</h1>
-        <ul class="student-list">
-            {% for student in students %}
-                <li class="student-item" style="margin-bottom: 10px;">
-                    <button>{{ student.name }}</button>
-                    <button class="mtr-no">{{ student.matriculation }}</button>
-                </li>
-            {% empty %}
-                <li>No students found.</li>
-            {% endfor %}
-        </ul>
-    </div>
-    </div>
-    <div id="image4">
-            <img src="{% static 'home/images/image-4.png' %}" alt="img4">
-    </div>
-    <div class="col2">
-    <!-- Projects -->
-    <div class="projects">
-        <h1>Projects</h1>
-        <div class="button-container" style="display: inline-block;">
-            {% for project in projects %}
-                <form action="{% url project.url_name %}" method="get">
-                    {% csrf_token %}
-                    <button type="submit">{{ project.name }}</button>
-                </form>
-            {% endfor %}
-        </div>
-    </div>
-    </div>
-    
+    </section>
 
-</div>
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 gradient-text">Our AI Projects</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                A collection of our human-centric AI projects demonstrating ethical AI development and practical applications.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="project-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="h-48 bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center">
+                    <i class="fas fa-brain text-white text-6xl"></i>
+                </div>
+                <div class="p-6">
+                    <div class="uppercase tracking-wide text-sm text-blue-600 font-semibold">Project 1</div>
+                    <h3 class="mt-1 text-xl font-semibold text-gray-900">Data Visualization & ML</h3>
+                    <p class="mt-2 text-gray-500">
+                        A web-based tool that allows users to upload CSV datasets, visualize data insights, and train machine learning models—all in one streamlined interface.
 
+                    </p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Python</span>
+                        <span class="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">Tensorflow</span>
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Javascript</span>
+                    </div>
+                    <form action="{% url 'project1:index' %}" method="get">
+                        {% csrf_token %}
+                        <button type="submit" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
+                            View Details
+                        </button>
+                    </form>
+                </div>
+            </div>
+                
+                <!-- Project 2 -->
+                <div class="project-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                    <div class="h-48 bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="uppercase tracking-wide text-sm text-purple-600 font-semibold">Project 2</div>
+                        <h3 class="mt-1 text-xl font-semibold text-gray-900">Healthcare Assistant</h3>
+                        <p class="mt-2 text-gray-500">
+                            AI-powered healthcare assistant that provides personalized recommendations while preserving privacy.
+                        </p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">PyTorch</span>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">NLP</span>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Privacy</span>
+                        </div>
+                        <button class="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded transition">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                
+               
+</html>
 {% endblock %}
 
 {% block script %}
 {% endblock script %}
+
