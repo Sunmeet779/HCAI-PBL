@@ -12,7 +12,7 @@ def index(request):
     template = loader.get_template("home/index.html")
     
     
-    students = [        
+    students = [
         {"name": "Sanika Acharya", "matriculation": "640981"},
         {"name": "Sunmeet Kohli", "matriculation": "642365"},
     ]
