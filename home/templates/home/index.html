@@ -2,9 +2,6 @@
 
 {%  load static %}
 
-
-
-
 {% block content %}
 
 <!DOCTYPE html>
@@ -177,6 +174,8 @@
                             <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">NLP</span>
                             <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Privacy</span>
                         </div>
+                        <form action="{% url 'project2:index' %}" method="get">
+                        {% csrf_token %}
                         <button class="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded transition">
                             View Details
                         </button>
