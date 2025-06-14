@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project 2: Text Classification</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background: linear-gradient(to bottom right, #f0f4ff, #d8eaff);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    main {
+      background: #fff;
+      padding: 40px 50px;
+      border-radius: 14px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 750px;
+    }
+
+    h1, h2 {
+      color: #2c3e50;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      color: #34495e;
+    }
+
+    p, li {
+      font-size: 0.98rem;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    ul ul {
+      margin-top: 5px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 25px;
+      margin-bottom: 10px;
+    }
+
+    select {
+      width: 100%;
+      max-width: 320px;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      background-color: #4a90e2;
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #3b78c3;
+      transform: translateY(-1px);
+    }
+
+    .message {
+      background-color: #eafaf1;
+      border-left: 5px solid #4caf50;
+      padding: 12px 18px;
+      border-radius: 6px;
+      margin-top: 30px;
+      font-weight: 500;
+      color: #2e7d32;
+    }
+
+    hr {
+      margin: 35px 0;
+      border: none;
+      border-top: 1px solid #eee;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 30px 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1><i class="bi bi-diagram-3-fill" style="color:#4a90e2;"></i> Task 1: Supervised Text Classification</h1>
+
+    <h2><i class="bi bi-info-circle-fill" style="color:#4a90e2;"></i> Classifier Description</h2>
+    <p>This project uses a two-step classifier for sentiment analysis:</p>
+    <ul>
+      <li><strong>Text Representation (Encoding):</strong> Converts text into numerical vectors using different methods:
+        <ul>
+          <li><strong>TF-IDF:</strong> Weighs words by importance based on term frequency and inverse document frequency.</li>
+          <li><strong>Bag of Words:</strong> Counts word occurrences without considering order or importance.</li>
+          <li><strong>Word2Vec:</strong> Learns word embeddings that capture semantic similarity by training on the corpus.</li>
+          <li><strong>LDA (Latent Dirichlet Allocation):</strong> Topic modeling method that represents documents as mixtures of topics.</li>
+        </ul>
+      </li>
+      <li><strong>Classification Module:</strong> Logistic Regression classifier trained on the encoded vectors to predict sentiment.</li>
+    </ul>
+
+    <p>Use the form below to train or load a model with your preferred representation method and view accuracy on the test set.</p>
+    
+    <hr>
+
+    <form method="post">
+      {% csrf_token %}
+      <label for="representation"><i class="bi bi-list-stars" style="color:#4a90e2;"></i> Choose text representation:</label>
+      <select name="representation" id="representation">
+        <option value="tfidf" {% if selected_rep == 'tfidf' %}selected{% endif %}>TF-IDF</option>
+        <option value="bow" {% if selected_rep == 'bow' %}selected{% endif %}>Bag of Words</option>
+        <option value="word2vec" {% if selected_rep == 'word2vec' %}selected{% endif %}>Word2Vec</option>
+        <option value="lda" {% if selected_rep == 'lda' %}selected{% endif %}>LDA (Topic Model)</option>
+      </select>
+
+      <div class="button-group">
+        <button type="submit" name="action" value="train">
+          <i class="bi bi-cpu-fill"></i> Train Model
+        </button>
+        <button type="submit" name="action" value="load">
+          <i class="bi bi-cloud-arrow-down-fill"></i> Load Pretrained Model
+        </button>
+      </div>
+    </form>
+
+    {% if message %}
+    <div class="message"><i class="bi bi-check-circle-fill"></i> {{ message }}</div>
+    {% endif %}
+  </main>
+</body>
+</html>
