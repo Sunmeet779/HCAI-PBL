@@ -1,193 +1,957 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Project 2: Text Classification</title>
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 40px 20px;
-      background: linear-gradient(to bottom right, #f0f4ff, #d8eaff);
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-
-    main {
-      background: #fff;
-      padding: 40px 50px;
-      border-radius: 14px;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 750px;
-    }
-
-    h1, h2 {
-      color: #2c3e50;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-    }
-
-    h2 {
-      font-size: 1.25rem;
-      margin-top: 30px;
-      margin-bottom: 10px;
-      color: #34495e;
-    }
-
-    p, li {
-      font-size: 0.98rem;
-      color: #444;
-      line-height: 1.6;
-    }
-
-    ul {
-      padding-left: 20px;
-      margin-bottom: 15px;
-    }
-
-    ul ul {
-      margin-top: 5px;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-top: 25px;
-      margin-bottom: 10px;
-    }
-
-    select {
-      width: 100%;
-      max-width: 320px;
-      padding: 10px 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: #f9f9f9;
-      font-size: 1rem;
-      font-family: inherit;
-    }
-
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 25px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 6px;
-      background-color: #4a90e2;
-      color: #fff;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    button:hover {
-      background-color: #3b78c3;
-      transform: translateY(-1px);
-    }
-
-    .message {
-      background-color: #eafaf1;
-      border-left: 5px solid #4caf50;
-      padding: 12px 18px;
-      border-radius: 6px;
-      margin-top: 30px;
-      font-weight: 500;
-      color: #2e7d32;
-    }
-
-    hr {
-      margin: 35px 0;
-      border: none;
-      border-top: 1px solid #eee;
-    }
-
-    @media (max-width: 600px) {
-      main {
-        padding: 30px 20px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Active Learning for Text Classification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .progress-bar {
+        height: 6px;
+        transition: width 0.3s ease;
       }
-
-      .button-group {
-        flex-direction: column;
+      .review-card {
+        transition: all 0.3s ease;
       }
-
-      button {
-        width: 100%;
-        justify-content: center;
+      .review-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       }
-    }
-  </style>
-</head>
-<body>
-  <main>
-    <h1><i class="bi bi-diagram-3-fill" style="color:#4a90e2;"></i> Task 1: Supervised Text Classification</h1>
-
-    <h2><i class="bi bi-info-circle-fill" style="color:#4a90e2;"></i> Classifier Description</h2>
-    <p>This project uses a two-step classifier for sentiment analysis:</p>
-    <ul>
-      <li><strong>Text Representation (Encoding):</strong> Converts text into numerical vectors using different methods:
-        <ul>
-          <li><strong>TF-IDF:</strong> Weighs words by importance based on term frequency and inverse document frequency.</li>
-          <li><strong>Bag of Words:</strong> Counts word occurrences without considering order or importance.</li>
-          <li><strong>Word2Vec:</strong> Learns word embeddings that capture semantic similarity by training on the corpus.</li>
-          <li><strong>LDA (Latent Dirichlet Allocation):</strong> Topic modeling method that represents documents as mixtures of topics.</li>
-        </ul>
-      </li>
-      <li><strong>Classification Module:</strong> Logistic Regression classifier trained on the encoded vectors to predict sentiment.</li>
-    </ul>
-
-    <p>Use the form below to train or load a model with your preferred representation method and view accuracy on the test set.</p>
-    
-    <hr>
-
-    <form method="post">
-      {% csrf_token %}
-      <label for="representation"><i class="bi bi-list-stars" style="color:#4a90e2;"></i> Choose text representation:</label>
-      <select name="representation" id="representation">
-        <option value="tfidf" {% if selected_rep == 'tfidf' %}selected{% endif %}>TF-IDF</option>
-        <option value="bow" {% if selected_rep == 'bow' %}selected{% endif %}>Bag of Words</option>
-        <option value="word2vec" {% if selected_rep == 'word2vec' %}selected{% endif %}>Word2Vec</option>
-        <option value="lda" {% if selected_rep == 'lda' %}selected{% endif %}>LDA (Topic Model)</option>
-      </select>
-
-      <div class="button-group">
-        <button type="submit" name="action" value="train">
-          <i class="bi bi-cpu-fill"></i> Train Model
-        </button>
-        <button type="submit" name="action" value="load">
-          <i class="bi bi-cloud-arrow-down-fill"></i> Load Pretrained Model
-        </button>
+      #learning-curve {
+        width: 100% !important;
+        height: 300px !important;
+      }
+      .loading-spinner {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .model-option {
+        display: flex;
+        justify-content: space-between;
+      }
+      .pretrained-badge {
+        display: inline-block;
+        background-color: #3b82f6;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        margin-left: 0.5rem;
+      }
+      .alert-enter {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      .alert-enter-active {
+        opacity: 1;
+        transform: translateX(0);
+        transition: all 300ms ease-out;
+      }
+      .alert-exit {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .alert-exit-active {
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 300ms ease-in;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Active Learning System</h1>
+        <p class="text-gray-600">IMDB Sentiment Analysis</p>
       </div>
-    </form>
 
-    {% if message %}
-    <div class="message"><i class="bi bi-check-circle-fill"></i> {{ message }}</div>
-    {% endif %}
-  </main>
-</body>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Pretrained Models Panel -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-upload mr-2 text-blue-500"></i> Load Pretrained
+            Model
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Model Type</label
+              >
+              <select
+                id="pretrained-model-type"
+                class="w-full p-2 border rounded"
+              >
+                <option value="">Select a model type</option>
+                <option value="tfidf">TF-IDF</option>
+                <option value="bow">Bag of Words</option>
+                <option value="word2vec">Word2Vec</option>
+                <option value="lda">LDA</option>
+              </select>
+            </div>
+            <div id="pretrained-models-container" class="hidden">
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Select Model</label
+              >
+              <select
+                id="pretrained-model-select"
+                class="w-full p-2 border rounded"
+              ></select>
+            </div>
+            <button
+              id="load-pretrained-btn"
+              class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50"
+              disabled
+            >
+              <i class="fas fa-upload mr-2"></i> Load Model
+            </button>
+            <div
+              id="pretrained-results"
+              class="hidden p-3 bg-gray-50 rounded text-sm"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Model Training Panel -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-cog mr-2 text-blue-500"></i> Model Configuration
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Model Type</label
+              >
+              <select id="model-type" class="w-full p-2 border rounded">
+                <option value="tfidf">TF-IDF</option>
+                <option value="bow">Bag of Words</option>
+                <option value="word2vec">Word2Vec</option>
+                <option value="lda">LDA</option>
+              </select>
+            </div>
+            <button
+              id="train-btn"
+              class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+            >
+              <i class="fas fa-play-circle mr-2"></i> Train Model
+            </button>
+            <div
+              id="train-results"
+              class="hidden p-3 bg-gray-50 rounded text-sm"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Active Learning Panel -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-lightbulb mr-2 text-purple-500"></i> Active
+            Learning
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Strategy</label
+              >
+              <select id="al-strategy" class="w-full p-2 border rounded">
+                <option value="random">Random Sampling</option>
+                <option value="uncertainty">Uncertainty Sampling</option>
+                <option value="margin">Margin Sampling</option>
+                <option value="entropy">Entropy Sampling</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Batch Size</label
+                >
+                <input
+                  type="number"
+                  id="batch-size"
+                  value="5"
+                  min="1"
+                  max="20"
+                  class="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Initial Pool</label
+                >
+                <input
+                  type="number"
+                  id="initial-pool"
+                  value="100"
+                  min="10"
+                  max="1000"
+                  class="w-full p-2 border rounded"
+                />
+              </div>
+            </div>
+            <button
+              id="start-al"
+              class="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition-colors"
+            >
+              <i class="fas fa-rocket mr-2"></i> Start Active Learning
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Panel -->
+      <div class="bg-white p-6 rounded-lg shadow mt-6">
+        <h2 class="text-xl font-semibold mb-4 flex items-center">
+          <i class="fas fa-chart-line mr-2 text-green-500"></i> Learning
+          Progress
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 h-64">
+            <canvas id="learning-curve"></canvas>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-blue-50 p-3 rounded">
+              <p class="text-xs text-blue-600">Labeled Samples</p>
+              <p id="labeled-count" class="text-xl font-bold">0</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded">
+              <p class="text-xs text-green-600">Accuracy</p>
+              <p id="accuracy" class="text-xl font-bold">0%</p>
+            </div>
+            <div class="bg-yellow-50 p-3 rounded">
+              <p class="text-xs text-yellow-600">Model Type</p>
+              <p id="current-model-type" class="text-xl font-bold">-</p>
+            </div>
+            <div class="bg-purple-50 p-3 rounded">
+              <p class="text-xs text-purple-600">Learning Strategy</p>
+              <p id="current-strategy-display" class="text-xl font-bold">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Samples to Label -->
+      <div
+        id="samples-panel"
+        class="hidden mt-6 bg-white p-6 rounded-lg shadow"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">Samples to Label</h2>
+          <div class="text-sm text-gray-500">
+            Strategy:
+            <span id="current-strategy" class="font-medium">Random</span>
+            <span id="pretrained-badge" class="pretrained-badge hidden"
+              >Pretrained</span
+            >
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="flex justify-between text-sm text-gray-600 mb-1">
+            <span
+              >Selected: <span id="selected-count">0</span>/<span
+                id="total-count"
+                >0</span
+              ></span
+            >
+            <button
+              id="select-all-btn"
+              class="text-blue-600 hover:text-blue-800"
+            >
+              Select All
+            </button>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              id="selection-progress"
+              class="bg-blue-600 h-2.5 rounded-full"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+        <div
+          id="samples-container"
+          class="space-y-3 max-h-96 overflow-y-auto pr-2"
+        ></div>
+        <div class="mt-4 flex justify-between items-center">
+          <button
+            id="skip-batch"
+            class="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300 transition-colors"
+          >
+            <i class="fas fa-forward mr-2"></i> Skip Batch
+          </button>
+          <button
+            id="submit-labels"
+            class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors disabled:opacity-50"
+            disabled
+          >
+            <i class="fas fa-check-circle mr-2"></i> Submit Labels
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize Chart
+      const ctx = document.getElementById("learning-curve").getContext("2d");
+      const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Accuracy",
+              data: [],
+              borderColor: "#4F46E5",
+              backgroundColor: "rgba(79, 70, 229, 0.1)",
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: "#4F46E5",
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 0.5,
+              max: 1.0,
+              ticks: {
+                callback: function (value) {
+                  return (value * 100).toFixed(0) + "%";
+                },
+              },
+            },
+            x: {
+              title: {
+                display: true,
+                text: "Labeled Samples",
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return `Accuracy: ${(context.raw * 100).toFixed(2)}%`;
+                },
+              },
+            },
+            legend: {
+              display: false,
+            },
+          },
+        },
+      });
+
+      // Global variables
+      let currentSessionId = "default";
+      let currentBatchSize = 5;
+      let activeAlerts = [];
+
+      // DOM elements
+      const pretrainedModelType = document.getElementById(
+        "pretrained-model-type"
+      );
+      const pretrainedModelsContainer = document.getElementById(
+        "pretrained-models-container"
+      );
+      const pretrainedModelSelect = document.getElementById(
+        "pretrained-model-select"
+      );
+      const loadPretrainedBtn = document.getElementById("load-pretrained-btn");
+      const pretrainedResults = document.getElementById("pretrained-results");
+      const currentModelTypeDisplay =
+        document.getElementById("current-model-type");
+      const currentStrategyDisplay = document.getElementById(
+        "current-strategy-display"
+      );
+      const pretrainedBadge = document.getElementById("pretrained-badge");
+
+      // Event Listeners
+      document
+        .getElementById("train-btn")
+        .addEventListener("click", trainModel);
+      document
+        .getElementById("start-al")
+        .addEventListener("click", startActiveLearning);
+      document
+        .getElementById("submit-labels")
+        .addEventListener("click", submitLabels);
+      document
+        .getElementById("skip-batch")
+        .addEventListener("click", skipBatch);
+      document
+        .getElementById("select-all-btn")
+        .addEventListener("click", toggleSelectAll);
+      pretrainedModelType.addEventListener("change", loadModelOptions);
+      loadPretrainedBtn.addEventListener("click", loadPretrainedModel);
+
+      // Update selected count when checkboxes change
+      document.addEventListener("change", function (e) {
+        if (e.target.matches('#samples-container input[type="checkbox"]')) {
+          updateSelectionCount();
+        }
+      });
+
+      // Update batch size when input changes
+      document
+        .getElementById("batch-size")
+        .addEventListener("change", function () {
+          currentBatchSize = parseInt(this.value);
+          document.getElementById("total-count").textContent = currentBatchSize;
+          updateSelectionCount();
+        });
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        currentBatchSize = parseInt(
+          document.getElementById("batch-size").value
+        );
+        document.getElementById("total-count").textContent = currentBatchSize;
+      });
+
+      // Load available models when model type is selected
+      async function loadModelOptions() {
+        const modelType = this.value;
+
+        if (!modelType) {
+          pretrainedModelsContainer.classList.add("hidden");
+          loadPretrainedBtn.disabled = true;
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/project2/list-models/?model_type=${modelType}`
+          );
+          const data = await response.json();
+
+          if (data.models && data.models.length > 0) {
+            pretrainedModelSelect.innerHTML = "";
+            data.models.forEach((model) => {
+              const option = document.createElement("option");
+              option.value = model.filename;
+              option.innerHTML = `
+                <span>${model.filename}</span>
+                <span class="text-green-600">${(model.accuracy * 100).toFixed(
+                  2
+                )}%</span>
+              `;
+              pretrainedModelSelect.appendChild(option);
+            });
+
+            pretrainedModelsContainer.classList.remove("hidden");
+            loadPretrainedBtn.disabled = false;
+            pretrainedResults.classList.add("hidden");
+          } else {
+            pretrainedModelsContainer.classList.add("hidden");
+            loadPretrainedBtn.disabled = true;
+            showAlert(`No pretrained models found for ${modelType}`, "warning");
+          }
+        } catch (error) {
+          console.error("Error fetching models:", error);
+          showAlert(`Error loading models: ${error.message}`, "error");
+        }
+      }
+
+      // Load pretrained model
+      async function loadPretrainedModel() {
+        const modelType = pretrainedModelType.value;
+        const filename = pretrainedModelSelect.value;
+
+        if (!modelType || !filename) return;
+
+        const originalBtnContent = loadPretrainedBtn.innerHTML;
+        loadPretrainedBtn.innerHTML =
+          '<i class="fas fa-spinner loading-spinner mr-2"></i> Loading...';
+        loadPretrainedBtn.disabled = true;
+        pretrainedResults.innerHTML = "";
+        pretrainedResults.classList.remove("hidden");
+
+        try {
+          const response = await fetch("/project2/load-pretrained/", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model_type: modelType,
+              filename: filename,
+            }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            showAlert("Model loaded successfully!", "success");
+            currentSessionId = data.session_id;
+            document.getElementById("samples-panel").classList.remove("hidden");
+            pretrainedBadge.classList.remove("hidden");
+            await updateProgress();
+          } else {
+            showAlert(data.error || "Failed to load model", "error");
+          }
+        } catch (error) {
+          showAlert(error.message, "error");
+        } finally {
+          loadPretrainedBtn.innerHTML = originalBtnContent;
+          loadPretrainedBtn.disabled = false;
+        }
+      }
+
+      // Train model function
+      async function trainModel() {
+        const modelType = document.getElementById("model-type").value;
+        const trainBtn = document.getElementById("train-btn");
+        const resultsDiv = document.getElementById("train-results");
+
+        // Save original button content
+        const originalBtnContent = trainBtn.innerHTML;
+
+        trainBtn.innerHTML =
+          '<i class="fas fa-spinner loading-spinner mr-2"></i> Training...';
+        trainBtn.disabled = true;
+        resultsDiv.innerHTML = "";
+        resultsDiv.classList.remove("hidden");
+
+        try {
+          const response = await fetch(`/project2/train/${modelType}/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            resultsDiv.innerHTML = `
+              <div class="p-3 bg-green-50 text-green-800 rounded">
+                <p class="font-medium">Training successful!</p>
+                <p>Model Type: ${modelType.toUpperCase()}</p>
+                <p>Accuracy: ${(data.accuracy * 100).toFixed(2)}%</p>
+                <p class="text-xs mt-2">Model saved as: ${data.filename}</p>
+              </div>
+            `;
+          } else {
+            resultsDiv.innerHTML = `
+              <div class="p-3 bg-red-50 text-red-800 rounded">
+                <p class="font-medium">Error occurred</p>
+                <p>${data.error || "Unknown error during training"}</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          resultsDiv.innerHTML = `
+            <div class="p-3 bg-red-50 text-red-800 rounded">
+              <p class="font-medium">Network Error</p>
+              <p>${error.message}</p>
+            </div>
+          `;
+        } finally {
+          trainBtn.innerHTML = originalBtnContent;
+          trainBtn.disabled = false;
+        }
+      }
+
+      // Start active learning session
+      async function startActiveLearning() {
+        const modelType = document.getElementById("model-type").value;
+        const strategy = document.getElementById("al-strategy").value;
+        const batchSize = document.getElementById("batch-size").value;
+        const initialPool = document.getElementById("initial-pool").value;
+        const startBtn = document.getElementById("start-al");
+
+        // Save original button content
+        const originalBtnContent = startBtn.innerHTML;
+
+        startBtn.innerHTML =
+          '<i class="fas fa-spinner loading-spinner mr-2"></i> Starting...';
+        startBtn.disabled = true;
+
+        try {
+          const response = await fetch("/project2/active-learning/start/", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model_type: modelType,
+              strategy: strategy,
+              batch_size: batchSize,
+              initial_size: initialPool,
+              session_id: currentSessionId,
+            }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            // Show samples panel
+            document.getElementById("samples-panel").classList.remove("hidden");
+            document.getElementById("current-strategy").textContent =
+              strategy.charAt(0).toUpperCase() + strategy.slice(1);
+            document.getElementById("total-count").textContent = batchSize;
+            pretrainedBadge.classList.add("hidden");
+
+            // Load first batch
+            await getNextBatch();
+
+            // Update progress
+            await updateProgress();
+          } else {
+            showAlert(
+              `Error: ${data.error || "Failed to start active learning"}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, "error");
+        } finally {
+          startBtn.innerHTML = originalBtnContent;
+          startBtn.disabled = false;
+        }
+      }
+
+      // Get next batch of samples to label
+      async function getNextBatch() {
+        const container = document.getElementById("samples-container");
+        const submitBtn = document.getElementById("submit-labels");
+
+        // Show loading state
+        container.innerHTML = `
+          <div class="flex justify-center items-center h-32">
+            <i class="fas fa-spinner loading-spinner text-2xl text-gray-400"></i>
+          </div>
+        `;
+        submitBtn.disabled = true;
+
+        try {
+          const response = await fetch(
+            "/project2/active-learning/next-batch/",
+            {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                session_id: currentSessionId,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (response.ok) {
+            container.innerHTML = "";
+
+            if (data.samples && data.samples.length > 0) {
+              data.samples.forEach((sample, index) => {
+                const sampleDiv = document.createElement("div");
+                sampleDiv.className =
+                  "review-card bg-gray-50 p-4 rounded border border-gray-200";
+                sampleDiv.innerHTML = `
+                  <div class="flex items-start">
+                    <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600" 
+                           data-id="${sample.id}" id="sample-${index}">
+                    <div class="ml-3 flex-1">
+                      <p class="text-sm text-gray-700">${sample.text}</p>
+                      <div class="mt-2 flex space-x-2">
+                        <button class="label-btn bg-red-100 text-red-800 px-2 py-1 text-xs rounded hover:bg-red-200 transition-colors" 
+                                data-id="${sample.id}" data-label="0">
+                          <i class="far fa-thumbs-down mr-1"></i> Negative
+                        </button>
+                        <button class="label-btn bg-green-100 text-green-800 px-2 py-1 text-xs rounded hover:bg-green-200 transition-colors" 
+                                data-id="${sample.id}" data-label="1">
+                          <i class="far fa-thumbs-up mr-1"></i> Positive
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                container.appendChild(sampleDiv);
+              });
+
+              // Add event listeners to label buttons
+              document.querySelectorAll(".label-btn").forEach((btn) => {
+                btn.addEventListener("click", function () {
+                  const checkbox = this.closest(".review-card").querySelector(
+                    'input[type="checkbox"]'
+                  );
+                  checkbox.checked = true;
+                  checkbox.dataset.label = this.dataset.label;
+                  updateSelectionCount();
+                });
+              });
+
+              // Initialize selection count
+              updateSelectionCount();
+            } else {
+              container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                  <i class="fas fa-info-circle text-2xl mb-2"></i>
+                  <p>No more samples available for labeling</p>
+                </div>
+              `;
+              submitBtn.disabled = true;
+            }
+          } else {
+            container.innerHTML = `
+              <div class="text-center py-8 text-red-500">
+                <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+                <p>${data.error || "Error loading samples"}</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          container.innerHTML = `
+            <div class="text-center py-8 text-red-500">
+              <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Submit labels for current batch
+      async function submitLabels() {
+        const checkboxes = document.querySelectorAll(
+          '#samples-container input[type="checkbox"]:checked'
+        );
+        const labels = {};
+        const submitBtn = document.getElementById("submit-labels");
+
+        // Save original button content
+        const originalBtnContent = submitBtn.innerHTML;
+
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner loading-spinner mr-2"></i> Processing...';
+        submitBtn.disabled = true;
+
+        checkboxes.forEach((checkbox) => {
+          labels[checkbox.dataset.id] = checkbox.dataset.label || "0";
+        });
+
+        try {
+          const response = await fetch(
+            "/project2/active-learning/submit-labels/",
+            {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                session_id: currentSessionId,
+                labels: labels,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (response.ok) {
+            showAlert(
+              `${Object.keys(labels).length} samples labeled successfully!`,
+              "success"
+            );
+            await getNextBatch();
+            await updateProgress();
+          } else {
+            showAlert(
+              `Error: ${data.error || "Failed to submit labels"}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, "error");
+        } finally {
+          submitBtn.innerHTML = originalBtnContent;
+        }
+      }
+
+      // Skip current batch
+      async function skipBatch() {
+        try {
+          // Submit empty labels to skip the batch
+          const response = await fetch(
+            "/project2/active-learning/submit-labels/",
+            {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                session_id: currentSessionId,
+                labels: {},
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (response.ok) {
+            showAlert("Batch skipped successfully", "info");
+            await getNextBatch();
+            await updateProgress();
+          } else {
+            showAlert(
+              `Error: ${data.error || "Failed to skip batch"}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, "error");
+        }
+      }
+
+      // Toggle select all samples
+      function toggleSelectAll() {
+        const checkboxes = document.querySelectorAll(
+          '#samples-container input[type="checkbox"]'
+        );
+        const selectAllBtn = document.getElementById("select-all-btn");
+        const allChecked = Array.from(checkboxes).every(
+          (checkbox) => checkbox.checked
+        );
+
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = !allChecked;
+          // Set a default label if not already set
+          if (!checkbox.dataset.label) {
+            checkbox.dataset.label = "1"; // Default to positive
+          }
+        });
+
+        selectAllBtn.textContent = allChecked ? "Select All" : "Deselect All";
+        updateSelectionCount();
+      }
+
+      // Update selection count display
+      function updateSelectionCount() {
+        const checkboxes = document.querySelectorAll(
+          '#samples-container input[type="checkbox"]:checked'
+        );
+        const selectedCount = checkboxes.length;
+        const totalCount = currentBatchSize;
+        const progress = (selectedCount / totalCount) * 100;
+
+        document.getElementById("selected-count").textContent = selectedCount;
+        document.getElementById(
+          "selection-progress"
+        ).style.width = `${progress}%`;
+
+        // Enable/disable submit button based on selection
+        document.getElementById("submit-labels").disabled = selectedCount === 0;
+      }
+
+      // Update progress display
+      async function updateProgress() {
+        try {
+          const response = await fetch(
+            `/project2/active-learning/progress/?session_id=${currentSessionId}`
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            document.getElementById("labeled-count").textContent =
+              data.samples_labeled;
+            document.getElementById("accuracy").textContent = `${(
+              data.history.accuracy.slice(-1)[0] * 100
+            ).toFixed(2)}%`;
+            currentModelTypeDisplay.textContent = data.model_type.toUpperCase();
+            currentStrategyDisplay.textContent =
+              data.strategy.charAt(0).toUpperCase() + data.strategy.slice(1);
+
+            // Update chart
+            chart.data.labels = data.history.samples;
+            chart.data.datasets[0].data = data.history.accuracy;
+            chart.update();
+          }
+        } catch (error) {
+          console.error("Error updating progress:", error);
+        }
+      }
+
+      // Show alert message
+      function showAlert(message, type = "info") {
+        const colors = {
+          info: "bg-blue-50 text-blue-800",
+          success: "bg-green-50 text-green-800",
+          warning: "bg-yellow-50 text-yellow-800",
+          error: "bg-red-50 text-red-800",
+        };
+
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg ${colors[type]} max-w-md z-50 transition-all duration-300 transform translate-x-0 opacity-100`;
+        alertDiv.innerHTML = `
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              ${type === "info" ? '<i class="fas fa-info-circle"></i>' : ""}
+              ${type === "success" ? '<i class="fas fa-check-circle"></i>' : ""}
+              ${
+                type === "warning"
+                  ? '<i class="fas fa-exclamation-triangle"></i>'
+                  : ""
+              }
+              ${type === "error" ? '<i class="fas fa-times-circle"></i>' : ""}
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium">${message}</p>
+            </div>
+            <div class="ml-auto pl-3">
+              <button class="close-alert" aria-label="Close">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          alertDiv.classList.add("translate-x-full", "opacity-0");
+          setTimeout(() => alertDiv.remove(), 300);
+        }, 5000);
+
+        // Add click handler to close button
+        alertDiv.querySelector(".close-alert").addEventListener("click", () => {
+          alertDiv.classList.add("translate-x-full", "opacity-0");
+          setTimeout(() => alertDiv.remove(), 300);
+        });
+      }
+
+      // Get CSRF token from cookies
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
+  </body>
 </html>
