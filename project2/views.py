@@ -11,7 +11,7 @@ from sklearn.base import clone
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from gensim.models import Word2Vec
-from .model_utils import save_model, load_model, update_metadata, list_models
+from .model_utils import save_model, load_model, update_metadata, list_models, load_metadata
 from .utils import (load_imdb_dataset, initialize_vectorizer, 
                    evaluate_model, generate_filename, transform_text, document_vector)
 
@@ -49,6 +49,7 @@ def train_model(request, model_type):
         # Save model
         filename = generate_filename(model_type, accuracy)
         save_model(clf, filename)
+        update_metadata(model_type, filename, accuracy)
         
         # Save vectorizer if needed
         if model_type in ['tfidf', 'bow', 'lda']:
@@ -110,6 +111,12 @@ def load_pretrained_model(request):
         # Transform all training data
         X_vec = transform_text(X_train, vectorizer, model_type)
         
+        # Split into labeled and unlabeled pools for active learning
+        initial_size = 100  # You can make this configurable from frontend if needed
+        indices = np.random.permutation(len(X_train))
+        labeled_indices = indices[:initial_size].tolist()
+        unlabeled_indices = indices[initial_size:].tolist()
+        
         # Store session
         ACTIVE_LEARNING_SESSIONS[session_id] = {
             'model_type': model_type,
@@ -120,12 +127,12 @@ def load_pretrained_model(request):
             'X_vec': X_vec,
             'y': y_train.values,
             'y_test': y_test.values,
-            'labeled_indices': list(range(len(X_train))),  # Consider all as labeled
-            'unlabeled_indices': [],  # No unlabeled samples initially
+            'labeled_indices': labeled_indices,
+            'unlabeled_indices': unlabeled_indices,
             'clf': model,
             'history': {
                 'accuracy': [accuracy_score(y_test, model.predict(transform_text(X_test, vectorizer, model_type)))],
-                'samples': [len(X_train)]
+                'samples': [len(labeled_indices)]
             },
             'pretrained': True  # Flag to indicate this is a pretrained model
         }
