@@ -9,7 +9,6 @@ import os
 MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models')
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'models')
 METADATA_FILE = os.path.join(MODEL_DIR, 'metadata.json')
 
 os.makedirs(MODEL_DIR, exist_ok=True)
@@ -36,7 +35,7 @@ def save_metadata(metadata):
 def update_metadata(model_type, filename, accuracy):
     """Update metadata with new model information"""
     metadata = load_metadata()
-    metadata[model_type].append({
+    metadata.setdefault(model_type, []).append({
         'filename': filename,
         'accuracy': float(accuracy),
         'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -436,35 +436,36 @@
 
         try {
           const response = await fetch(
-            `/project2/list-models/?model_type=${modelType}`
+            `/project2/list-models/?model_type=${encodeURIComponent(modelType)}`
           );
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Server did not return JSON. Please check backend endpoint.");
+          }
           const data = await response.json();
 
           if (data.models && data.models.length > 0) {
-            pretrainedModelSelect.innerHTML = "";
-            data.models.forEach((model) => {
-              const option = document.createElement("option");
-              option.value = model.filename;
-              option.innerHTML = `
-                <span>${model.filename}</span>
-                <span class="text-green-600">${(model.accuracy * 100).toFixed(
-                  2
-                )}%</span>
-              `;
-              pretrainedModelSelect.appendChild(option);
-            });
-
+            // Populate the model select dropdown
+            pretrainedModelSelect.innerHTML = data.models
+              .map(
+                (model) =>
+                  `<option value="${model.filename}">${model.filename} (Acc: ${model.accuracy?.toFixed(4) ?? 'N/A'})</option>`
+              )
+              .join("");
             pretrainedModelsContainer.classList.remove("hidden");
             loadPretrainedBtn.disabled = false;
             pretrainedResults.classList.add("hidden");
           } else {
             pretrainedModelsContainer.classList.add("hidden");
             loadPretrainedBtn.disabled = true;
-            showAlert(`No pretrained models found for ${modelType}`, "warning");
+            pretrainedResults.classList.remove("hidden");
+            pretrainedResults.innerHTML = `<div class='text-red-500'>No pretrained models found for this type.</div>`;
           }
         } catch (error) {
           console.error("Error fetching models:", error);
           showAlert(`Error loading models: ${error.message}`, "error");
+          pretrainedModelsContainer.classList.add("hidden");
+          loadPretrainedBtn.disabled = true;
         }
       }
 
