@@ -1,194 +1,373 @@
 import os
+import json
 import pickle
+import time
 import numpy as np
 from django.shortcuts import render
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.base import clone
 from sklearn.model_selection import train_test_split
-from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.metrics import accuracy_score
 from gensim.models import Word2Vec
+from .model_utils import save_model, load_model, update_metadata, list_models
+from .utils import (load_imdb_dataset, initialize_vectorizer, 
+                   evaluate_model, generate_filename, transform_text, document_vector)
 
-# Paths
-DATA_PATH = "project2/data/IMDB Dataset.csv"
-MODEL_DIR = "project2/models/"
+# Global session storage (in production, use Django's session framework or database)
+ACTIVE_LEARNING_SESSIONS = {}
 
-# Ensure model dir exists
+# Model directory configuration
+MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models')
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-def load_imdb_dataset():
-    import pandas as pd
-    df = pd.read_csv(DATA_PATH)
-    df['sentiment'] = df['sentiment'].map({'positive': 1, 'negative': 0})
-    return train_test_split(df['review'], df['sentiment'], test_size=0.2, random_state=42)
-
-def document_vector(doc, model):
-    """Create document vector by averaging Word2Vec word vectors."""
-    words = doc.split()
-    word_vecs = []
-    for w in words:
-        if w in model.wv:
-            word_vecs.append(model.wv[w])
-    if len(word_vecs) == 0:
-        return np.zeros(model.vector_size)
-    return np.mean(word_vecs, axis=0)
-
 def index(request):
-    message = None
-    selected_rep = None
+    """Main dashboard view"""
+    return render(request, 'project2/project2_home.html', {
+        'models': list_models()
+    })
 
-    if request.method == "POST":
-        rep_type = request.POST.get("representation")
-        action = request.POST.get("action")
-        selected_rep = rep_type
+@csrf_exempt
+def train_model(request, model_type):
+    """Train a new model of specified type"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+    
+    try:
+        X, y = load_imdb_dataset()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        vectorizer, X_vec = initialize_vectorizer(model_type, X_train)
+        clf = LogisticRegression(max_iter=1000)
+        clf.fit(X_vec, y_train)
+        
+        # Evaluate model
+        X_test_vec = transform_text(X_test, vectorizer, model_type)
+        accuracy = accuracy_score(y_test, clf.predict(X_test_vec))
+        
+        # Save model
+        filename = generate_filename(model_type, accuracy)
+        save_model(clf, filename)
+        
+        # Save vectorizer if needed
+        if model_type in ['tfidf', 'bow', 'lda']:
+            vec_filename = f"{model_type}_vectorizer_{filename.split('_')[-1]}"
+            save_model(vectorizer, vec_filename)
+        elif model_type == 'word2vec':
+            vec_filename = f"word2vec_model_{filename.split('_')[-1].replace('.pkl', '.bin')}"
+            vectorizer.save(os.path.join(MODEL_DIR, vec_filename))
+        
+        update_metadata(model_type, filename, accuracy)
+        
+        return JsonResponse({
+            'status': 'success',
+            'model_type': model_type,
+            'accuracy': accuracy,
+            'filename': filename
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
-        X_train, X_test, y_train, y_test = load_imdb_dataset()
-
-        if action == "train":
-            # Train model depending on representation type
-            if rep_type == "tfidf":
-                vectorizer = TfidfVectorizer(max_features=10000)
-                X_train_vec = vectorizer.fit_transform(X_train)
-                clf = LogisticRegression(max_iter=5000)
-                clf.fit(X_train_vec, y_train)
-
-                X_test_vec = vectorizer.transform(X_test)
-                y_pred = clf.predict(X_test_vec)
-                acc = accuracy_score(y_test, y_pred)
-
-                # Save vectorizer and classifier
-                with open(os.path.join(MODEL_DIR, "tfidf_vectorizer.pkl"), "wb") as f:
-                    pickle.dump(vectorizer, f)
-                with open(os.path.join(MODEL_DIR, "tfidf_classifier.pkl"), "wb") as f:
-                    pickle.dump(clf, f)
-
-                message = f"Trained TF-IDF model with accuracy: {acc:.4f}"
-
-            elif rep_type == "bow":
-                vectorizer = CountVectorizer(max_features=10000)
-                X_train_vec = vectorizer.fit_transform(X_train)
-                clf = LogisticRegression(max_iter=1000)
-                clf.fit(X_train_vec, y_train)
-
-                X_test_vec = vectorizer.transform(X_test)
-                y_pred = clf.predict(X_test_vec)
-                acc = accuracy_score(y_test, y_pred)
-
-                # Save vectorizer and classifier
-                with open(os.path.join(MODEL_DIR, "bow_vectorizer.pkl"), "wb") as f:
-                    pickle.dump(vectorizer, f)
-                with open(os.path.join(MODEL_DIR, "bow_classifier.pkl"), "wb") as f:
-                    pickle.dump(clf, f)
-
-                message = f"Trained Bag of Words model with accuracy: {acc:.4f}"
-
-            elif rep_type == "word2vec":
-                # Train Word2Vec on training data only
-                sentences = [text.split() for text in X_train]
-                w2v_model = Word2Vec(sentences, vector_size=100, window=5, min_count=2, workers=4, epochs=10)
-
-                # Create document vectors
-                X_train_vec = np.array([document_vector(text, w2v_model) for text in X_train])
-                clf = LogisticRegression(max_iter=1000)
-                clf.fit(X_train_vec, y_train)
-
-                X_test_vec = np.array([document_vector(text, w2v_model) for text in X_test])
-                y_pred = clf.predict(X_test_vec)
-                acc = accuracy_score(y_test, y_pred)
-
-                # Save Word2Vec model and classifier
-                w2v_model.save(os.path.join(MODEL_DIR, "word2vec_model.bin"))
-                with open(os.path.join(MODEL_DIR, "word2vec_classifier.pkl"), "wb") as f:
-                    pickle.dump(clf, f)
-
-                message = f"Trained Word2Vec model with accuracy: {acc:.4f}"
-
-            elif rep_type == "lda":
-                # LDA requires CountVectorizer first
-                count_vectorizer = CountVectorizer(max_features=5000)
-                X_train_counts = count_vectorizer.fit_transform(X_train)
-
-                lda = LatentDirichletAllocation(n_components=5, max_iter=5, random_state=42)
-                X_train_lda = lda.fit_transform(X_train_counts)
-
-                clf = LogisticRegression(max_iter=5000)
-                clf.fit(X_train_lda, y_train)
-
-                X_test_counts = count_vectorizer.transform(X_test)
-                X_test_lda = lda.transform(X_test_counts)
-
-                y_pred = clf.predict(X_test_lda)
-                acc = accuracy_score(y_test, y_pred)
-
-                # Save CountVectorizer and combined lda+clf as dict
-                with open(os.path.join(MODEL_DIR, "lda_vectorizer.pkl"), "wb") as f:
-                    pickle.dump(count_vectorizer, f)
-                with open(os.path.join(MODEL_DIR, "lda_classifier.pkl"), "wb") as f:
-                    pickle.dump({'lda': lda, 'clf': clf}, f)
-
-                message = f"Trained LDA model with accuracy: {acc:.4f}"
-
-            else:
-                message = "Unknown representation type."
-
-        elif action == "load":
-            # Load pretrained model if exists and test accuracy
-            try:
-                if rep_type == "tfidf":
-                    with open(os.path.join(MODEL_DIR, "tfidf_vectorizer.pkl"), "rb") as f:
-                        vectorizer = pickle.load(f)
-                    with open(os.path.join(MODEL_DIR, "tfidf_classifier.pkl"), "rb") as f:
-                        clf = pickle.load(f)
-                    X_test_vec = vectorizer.transform(X_test)
-                    y_pred = clf.predict(X_test_vec)
-                    acc = accuracy_score(y_test, y_pred)
-                    message = f"Loaded pretrained TF-IDF model with test accuracy: {acc:.4f}"
-
-                elif rep_type == "bow":
-                    with open(os.path.join(MODEL_DIR, "bow_vectorizer.pkl"), "rb") as f:
-                        vectorizer = pickle.load(f)
-                    with open(os.path.join(MODEL_DIR, "bow_classifier.pkl"), "rb") as f:
-                        clf = pickle.load(f)
-                    X_test_vec = vectorizer.transform(X_test)
-                    y_pred = clf.predict(X_test_vec)
-                    acc = accuracy_score(y_test, y_pred)
-                    message = f"Loaded pretrained Bag of Words model with test accuracy: {acc:.4f}"
-
-                elif rep_type == "word2vec":
-                    w2v_model = Word2Vec.load(os.path.join(MODEL_DIR, "word2vec_model.bin"))
-                    with open(os.path.join(MODEL_DIR, "word2vec_classifier.pkl"), "rb") as f:
-                        clf = pickle.load(f)
-                    X_test_vec = np.array([document_vector(text, w2v_model) for text in X_test])
-                    y_pred = clf.predict(X_test_vec)
-                    acc = accuracy_score(y_test, y_pred)
-                    message = f"Loaded pretrained Word2Vec model with test accuracy: {acc:.4f}"
-
-                elif rep_type == "lda":
-                    with open(os.path.join(MODEL_DIR, "lda_vectorizer.pkl"), "rb") as f:
-                        count_vectorizer = pickle.load(f)
-                    with open(os.path.join(MODEL_DIR, "lda_classifier.pkl"), "rb") as f:
-                        classifier_dict = pickle.load(f)
-                    lda = classifier_dict['lda']
-                    clf = classifier_dict['clf']
-                    X_test_counts = count_vectorizer.transform(X_test)
-                    X_test_lda = lda.transform(X_test_counts)
-                    y_pred = clf.predict(X_test_lda)
-                    acc = accuracy_score(y_test, y_pred)
-                    message = f"Loaded pretrained LDA model with test accuracy: {acc:.4f}"
-
-                else:
-                    message = "Unknown representation type."
-
-            except FileNotFoundError:
-                message = f"No pretrained model found for {rep_type}."
-            except Exception as e:
-                message = f"Error loading models: {str(e)}"
-
+@csrf_exempt
+def load_pretrained_model(request):
+    """Load a pretrained model"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+    
+    try:
+        params = json.loads(request.body)
+        model_type = params.get('model_type')
+        filename = params.get('filename')
+        
+        if not model_type or not filename:
+            return JsonResponse({'error': 'Missing model_type or filename'}, status=400)
+        
+        # Load model
+        model_path = os.path.join(MODEL_DIR, filename)
+        if not os.path.exists(model_path):
+            return JsonResponse({'error': 'Model file not found'}, status=404)
+            
+        model = load_model(filename)
+        
+        # Load vectorizer
+        if model_type in ['tfidf', 'bow', 'lda']:
+            vec_filename = f"{model_type}_vectorizer_{filename.split('_')[-1]}"
+            vectorizer = load_model(vec_filename)
+        elif model_type == 'word2vec':
+            vec_filename = f"word2vec_model_{filename.split('_')[-1].replace('.pkl', '.bin')}"
+            vectorizer = Word2Vec.load(os.path.join(MODEL_DIR, vec_filename))
         else:
-            message = "Invalid action."
+            return JsonResponse({'error': 'Invalid model type'}, status=400)
+        
+        # Create new active learning session
+        session_id = f"pretrained_{int(time.time())}"
+        
+        X, y = load_imdb_dataset()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        # Transform all training data
+        X_vec = transform_text(X_train, vectorizer, model_type)
+        
+        # Store session
+        ACTIVE_LEARNING_SESSIONS[session_id] = {
+            'model_type': model_type,
+            'strategy': 'uncertainty',  # Default strategy
+            'batch_size': 5,  # Default batch size
+            'vectorizer': vectorizer,
+            'X_text': X_train.values,
+            'X_vec': X_vec,
+            'y': y_train.values,
+            'y_test': y_test.values,
+            'labeled_indices': list(range(len(X_train))),  # Consider all as labeled
+            'unlabeled_indices': [],  # No unlabeled samples initially
+            'clf': model,
+            'history': {
+                'accuracy': [accuracy_score(y_test, model.predict(transform_text(X_test, vectorizer, model_type)))],
+                'samples': [len(X_train)]
+            },
+            'pretrained': True  # Flag to indicate this is a pretrained model
+        }
+        
+        return JsonResponse({
+            'status': 'success',
+            'session_id': session_id,
+            'accuracy': ACTIVE_LEARNING_SESSIONS[session_id]['history']['accuracy'][0],
+            'message': 'Pretrained model loaded successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
-    context = {
-        "message": message,
-        "selected_rep": selected_rep,
-    }
-    return render(request, "project2/project2_home.html", context)
+@csrf_exempt
+def list_models_api(request):
+    """API endpoint to list available models"""
+    model_type = request.GET.get('model_type')
+    metadata = load_metadata()
+    
+    if model_type:
+        models = metadata.get(model_type, [])
+    else:
+        models = []
+        for mt in metadata:
+            models.extend(metadata[mt])
+    
+    # Sort by accuracy descending and add full filename
+    models = sorted(models, key=lambda x: x['accuracy'], reverse=True)
+    for model in models:
+        model['filename'] = f"{model['filename']}"
+    
+    return JsonResponse({
+        'status': 'success',
+        'models': models
+    })
+
+@csrf_exempt
+def start_active_learning(request):
+    """Initialize active learning session"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+    
+    try:
+        params = json.loads(request.body)
+        session_id = params.get('session_id', 'default')
+        model_type = params.get('model_type', 'tfidf')
+        strategy = params.get('strategy', 'uncertainty')
+        batch_size = int(params.get('batch_size', 5))
+        initial_size = int(params.get('initial_size', 100))
+        
+        X, y = load_imdb_dataset()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        # Initialize vectorizer
+        vectorizer, X_vec = initialize_vectorizer(model_type, X_train)
+        
+        # Create initial labeled pool
+        indices = np.random.permutation(len(X_train))
+        labeled_indices = indices[:initial_size]
+        unlabeled_indices = indices[initial_size:]
+        
+        # Initialize classifier
+        clf = LogisticRegression(max_iter=1000)
+        clf.fit(X_vec[labeled_indices], y_train.iloc[labeled_indices])
+        
+        # Store session
+        ACTIVE_LEARNING_SESSIONS[session_id] = {
+            'model_type': model_type,
+            'strategy': strategy,
+            'batch_size': batch_size,
+            'vectorizer': vectorizer,
+            'X_text': X_train.values,
+            'X_vec': X_vec,
+            'y': y_train.values,
+            'y_test': y_test.values,
+            'labeled_indices': labeled_indices.tolist(),
+            'unlabeled_indices': unlabeled_indices.tolist(),
+            'clf': clf,
+            'history': {
+                'accuracy': [accuracy_score(y_test, clf.predict(transform_text(X_test, vectorizer, model_type)))],
+                'samples': [initial_size]
+            },
+            'pretrained': False
+        }
+        
+        return JsonResponse({
+            'status': 'success',
+            'session_id': session_id,
+            'initial_accuracy': ACTIVE_LEARNING_SESSIONS[session_id]['history']['accuracy'][0]
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def get_next_batch(request):
+    """Get next batch of samples to label"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+    
+    try:
+        params = json.loads(request.body)
+        session_id = params.get('session_id', 'default')
+        
+        if session_id not in ACTIVE_LEARNING_SESSIONS:
+            return JsonResponse({'error': 'Invalid session ID'}, status=400)
+            
+        session = ACTIVE_LEARNING_SESSIONS[session_id]
+        
+        # For pretrained models with no unlabeled samples
+        if session.get('pretrained', False) and len(session['unlabeled_indices']) == 0:
+            return JsonResponse({
+                'status': 'success',
+                'samples': [],
+                'message': 'No unlabeled samples available for pretrained model'
+            })
+            
+        strategy = session['strategy']
+        batch_size = session['batch_size']
+        unlabeled_indices = np.array(session['unlabeled_indices'])
+        X_pool = session['X_vec'][unlabeled_indices]
+        clf = session['clf']
+        
+        # Select samples based on strategy
+        if strategy == 'random':
+            query_idx = np.random.choice(len(unlabeled_indices), batch_size, replace=False)
+        else:
+            probs = clf.predict_proba(X_pool)
+            if strategy == 'uncertainty':
+                scores = 1 - np.max(probs, axis=1)
+            elif strategy == 'margin':
+                scores = np.sort(probs, axis=1)[:, -1] - np.sort(probs, axis=1)[:, -2]
+            elif strategy == 'entropy':
+                scores = -np.sum(probs * np.log(probs + 1e-10), axis=1)
+            query_idx = np.argpartition(scores, -batch_size)[-batch_size:]
+        
+        # Get original indices and text samples
+        sample_indices = unlabeled_indices[query_idx].tolist()
+        samples = [{
+            'id': int(idx),
+            'text': session['X_text'][idx]
+        } for idx in sample_indices]
+        
+        # Store current batch
+        session['current_batch'] = {
+            'query_idx': query_idx.tolist(),
+            'sample_indices': sample_indices
+        }
+        
+        return JsonResponse({
+            'status': 'success',
+            'samples': samples,
+            'strategy': strategy
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def submit_labels(request):
+    """Submit labeled samples and update model"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+    
+    try:
+        params = json.loads(request.body)
+        session_id = params.get('session_id', 'default')
+        labels = params.get('labels', {})
+        
+        if session_id not in ACTIVE_LEARNING_SESSIONS:
+            return JsonResponse({'error': 'Invalid session ID'}, status=400)
+            
+        session = ACTIVE_LEARNING_SESSIONS[session_id]
+        
+        if 'current_batch' not in session:
+            return JsonResponse({'error': 'No active batch'}, status=400)
+            
+        # Update labeled data
+        labeled_indices = session['labeled_indices']
+        unlabeled_indices = session['unlabeled_indices']
+        batch_indices = session['current_batch']['sample_indices']
+        
+        # Add new labels
+        for idx in batch_indices:
+            labeled_indices.append(idx)
+            unlabeled_indices.remove(idx)
+        
+        # Update y_train with new labels
+        for idx, label in labels.items():
+            idx = int(idx)
+            if idx in batch_indices:
+                session['y'][idx] = int(label)
+        
+        # Retrain model
+        clf = clone(session['clf'])
+        X_labeled = session['X_vec'][labeled_indices]
+        y_labeled = session['y'][labeled_indices]
+        clf.fit(X_labeled, y_labeled)
+        
+        # Evaluate
+        X_test_vec = transform_text(session['X_text'][:len(session['y_test'])], session['vectorizer'], session['model_type'])
+        acc = accuracy_score(session['y_test'], clf.predict(X_test_vec))
+        
+        # Update session
+        session['clf'] = clf
+        session['history']['accuracy'].append(acc)
+        session['history']['samples'].append(len(labeled_indices))
+        del session['current_batch']
+        
+        # For pretrained models, maintain all samples as labeled
+        if session.get('pretrained', False):
+            session['labeled_indices'] = list(range(len(session['X_text'])))
+            session['unlabeled_indices'] = []
+        
+        return JsonResponse({
+            'status': 'success',
+            'accuracy': acc,
+            'samples_labeled': len(labeled_indices),
+            'samples_remaining': len(unlabeled_indices),
+            'history': session['history']
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def learning_progress(request, session_id='default'):
+    """Get current learning progress"""
+    if request.method != 'GET':
+        return JsonResponse({'error': 'GET method required'}, status=400)
+        
+    if session_id not in ACTIVE_LEARNING_SESSIONS:
+        return JsonResponse({'error': 'Invalid session ID'}, status=400)
+        
+    session = ACTIVE_LEARNING_SESSIONS[session_id]
+    return JsonResponse({
+        'status': 'success',
+        'history': session['history'],
+        'model_type': session['model_type'],
+        'strategy': session['strategy'],
+        'samples_labeled': len(session['labeled_indices']),
+        'samples_remaining': len(session['unlabeled_indices']),
+        'pretrained': session.get('pretrained', False)
+    })
