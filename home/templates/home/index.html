@@ -141,7 +141,7 @@
                     <div class="uppercase tracking-wide text-sm text-blue-600 font-semibold">Project 1</div>
                     <h3 class="mt-1 text-xl font-semibold text-gray-900">Data Visualization & ML</h3>
                     <p class="mt-2 text-gray-500">
-                        A web-based tool that allows users to upload CSV datasets, visualize data insights, and train machine learning models—all in one streamlined interface.
+                      This project creates a Django-based web application to simplify supervised machine learning tasks. Users can upload CSV datasets, explore data through visualizations, and train various machine learning models using an interactive interface. The app handles data splitting, model training, and evaluation, making it easy for users to build and assess predictive models without deep programming knowledge.
 
                     </p>
                     <div class="mt-4 flex flex-wrap gap-2">
@@ -165,9 +165,9 @@
                     </div>
                     <div class="p-6">
                         <div class="uppercase tracking-wide text-sm text-purple-600 font-semibold">Project 2</div>
-                        <h3 class="mt-1 text-xl font-semibold text-gray-900">Imdb Dataset</h3>
+                        <h3 class="mt-1 text-xl font-semibold text-gray-900">Active Learning for Text Classification using IMDB Reviews</h3>
                         <p class="mt-2 text-gray-500">
-                            Sentiment Analysis
+                            This project explores active learning methods to efficiently train a sentiment classifier on the IMDB 50k movie review dataset. Starting with a fully supervised model as a baseline, the project then simulates label-efficient learning by interactively selecting the most informative samples, aiming to achieve high accuracy with minimal labeled data.
                         </p>
                         <div class="mt-4 flex flex-wrap gap-2">
                             <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">PyTorch</span>
@@ -177,6 +177,71 @@
                         <form action="{% url 'project2:index' %}" method="get">
                         {% csrf_token %}
                         <button class="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded transition">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                 <!-- Project 3 -->
+                <div class="project-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                    <div class="h-48 bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="uppercase tracking-wide text-sm text-green-600 font-semibold">Project 3</div>
+                        <h3 class="mt-1 text-xl font-semibold text-gray-900">Interactive Explainable Model on Penguin Species</h3>
+                        <p class="mt-2 text-gray-500">
+                            This project focuses on building interpretable models using the Palmer Penguins dataset. It includes an interactive interface to explore decision trees and logistic regression with adjustable model complexity, as well as a counterfactual explanation tool to understand predictions and suggest minimal changes for alternate outcomes.
+                        </p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">SHAP</span>
+                            <span class="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full">LIME</span>
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Visualization</span>
+                        </div>
+                        <button class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Project 4 -->
+                <div class="project-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                    <div class="h-48 bg-gradient-to-r from-yellow-400 to-red-500 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="uppercase tracking-wide text-sm text-yellow-600 font-semibold">Project 4</div>
+                        <h3 class="mt-1 text-xl font-semibold text-gray-900">Interactive Cold-Start Movie Recommender</h3>
+                        <p class="mt-2 text-gray-500">
+                            This project addresses the cold-start problem by letting new users rate movies while seeing how their input shapes future recommendations. Using the MovieLens dataset, it builds an interactive, user-guided system to quickly learn individual tastes.
+                        </p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Research</span>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">HCI</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">User Studies</span>
+                        </div>
+                        <button class="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Project 5 -->
+                <div class="project-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                    <div class="h-48 bg-gradient-to-r from-pink-400 to-red-500 flex items-center justify-center">
+                        <i class="fas fa-language text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <div class="uppercase tracking-wide text-sm text-pink-600 font-semibold">Project 5</div>
+                        <h3 class="mt-1 text-xl font-semibold text-gray-900">Bias Detection</h3>
+                        <p class="mt-2 text-gray-500">
+                            NLP system for detecting and mitigating bias in text data and language models.
+                        </p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">NLP</span>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Transformers</span>
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Fairness</span>
+                        </div>
+                        <button class="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded transition">
                             View Details
                         </button>
                     </div>
