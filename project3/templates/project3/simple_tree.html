@@ -1,0 +1,52 @@
+{% extends "project3/base.html" %}
+
+{% block title %}Simple Decision Tree{% endblock %}
+{% block navigation %}
+<div class="mb-8">
+  <a href="{% url 'project3:index' %}" 
+     class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
+    <i class="fas fa-arrow-left mr-2"></i> Back to Tasks Overview
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card bg-white">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+          <h2 class="text-xl font-semibold mb-4 text-gray-800">Model Performance</h2>
+          <div class="space-y-3">
+              <div>
+                  <p class="text-sm text-gray-500">Accuracy</p>
+                  <p class="text-2xl font-bold text-blue-600">{{ accuracy }}</p>
+              </div>
+              <div>
+                  <p class="text-sm text-gray-500">Leaves</p>
+                  <p class="text-2xl font-bold text-blue-600">{{ n_leaves }}</p>
+              </div>
+          </div>
+      </div>
+      
+      <div class="bg-green-50 p-6 rounded-lg border border-green-100">
+          <h2 class="text-xl font-semibold mb-4 text-gray-800">Features Used</h2>
+          <ul class="space-y-2">
+              {% for feature in features %}
+              <li class="flex items-center">
+                  <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                  <span>{{ feature }}</span>
+              </li>
+              {% endfor %}
+          </ul>
+      </div>
+  </div>
+
+  <div class="p-6 border-t border-gray-100">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Decision Tree Visualization</h2>
+      <div class="tree-container">
+          <img src="data:image/png;base64,{{ tree_image }}" 
+               alt="Decision Tree" 
+               class="mx-auto shadow-sm">
+      </div>
+  </div>
+</div>
+{% endblock %}

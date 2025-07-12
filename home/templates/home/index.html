@@ -179,6 +179,7 @@
                         <button class="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded transition">
                             View Details
                         </button>
+                        </form>
                     </div>
                 </div>
                  <!-- Project 3 -->
@@ -197,9 +198,12 @@
                             <span class="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full">LIME</span>
                             <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Visualization</span>
                         </div>
-                        <button class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">
-                            View Details
-                        </button>
+                        <form action="{% url 'project3:index' %}" method="get">
+                        {% csrf_token %}
+                            <button type="submit" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition">
+                                View Details
+                            </button>
+                        </form>
                     </div>
                 </div>
                 
