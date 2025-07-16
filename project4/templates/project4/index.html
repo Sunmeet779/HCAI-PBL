@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project 4 - Cold Start Study</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'project4/css/style.css' %}">
+</head>
+<body>
+    <h1>Influence of Future Predictions on Active Learning</h1>
+    <p>This study tests how user rating choices impact recommendations.</p>
+    <a href="{% url 'project4:study_interface' %}">Start Study</a><br>
+    <a href="{% url 'project4:method_and_study' %}">Download Method & Study PDF</a>
+</body>
+</html>

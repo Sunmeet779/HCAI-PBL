@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rate Movies</title>
+    {% load static %}
+</head>
+<body>
+    <h2>Rate the following movies (0.5 to 5):</h2>
+    <form method="post" action="{% url 'project4:submit_ratings' %}">
+        {% csrf_token %}
+        {% for movie in movies %}
+            <div>
+                <strong>{{ movie.title }}</strong><br>
+                <input type="number" name="rating_{{ movie.movieId }}" min="0.5" max="5" step="0.5">
+            </div><br>
+        {% endfor %}
+        <button type="submit">Submit Ratings</button>
+    </form>
+
+    {% if recommendations %}
+        <h3>Top Recommendations:</h3>
+        <ul>
+            {% for rec in recommendations %}
+                <li>{{ rec.title }} (score: {{ rec.score|floatformat:2 }})</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
