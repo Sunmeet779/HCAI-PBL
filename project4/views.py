@@ -3,6 +3,13 @@ from .recommender import MatrixFactorizationRecommender
 from .generate_pdf import generate_method_study_pdf
 import pandas as pd
 import os
+# Add this at the top
+from django.template.defaulttags import register
+
+# Add custom template filter
+@register.filter
+def split(value, arg):
+    return value.split(arg)
 
 # Train model once
 rec = MatrixFactorizationRecommender().train()
