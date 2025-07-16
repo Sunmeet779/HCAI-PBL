@@ -1,0 +1,47 @@
+{% extends "project4/base.html" %}
+
+{% block title %}Project 4 - Cold Start Study{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg p-5 mb-4">
+    <div class="text-center mb-4">
+        <i class="fas fa-star fa-4x text-primary mb-3"></i>
+        <h1 class="mb-3">Influence of Future Predictions on Active Learning</h1>
+        <p class="lead text-muted">
+            This study explores how showing prediction impacts affects user engagement and recommendation quality in movie recommender systems.
+        </p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                    <h3 class="card-title">Study Documentation</h3>
+                    <p class="card-text">
+                        Download the detailed methodology and user study design documentation
+                    </p>
+                    <a href="{% url 'project4:method_and_study' %}" class="btn btn-outline-primary mt-2">
+                        <i class="fas fa-download me-2"></i>Download PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-play-circle fa-3x text-success mb-3"></i>
+                    <h3 class="card-title">Participate in Study</h3>
+                    <p class="card-text">
+                        Help us improve recommendation systems by rating movies
+                    </p>
+                    <a href="{% url 'project4:study_interface' %}" class="btn btn-success mt-2">
+                        Start Study <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
