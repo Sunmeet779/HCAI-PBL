@@ -7,16 +7,13 @@ django-bootstrap5==25.1
 fontawesome-free==5.15.4
 fonttools==4.58.0
 fpdf==1.7.2
-gensim @ file:///C:/b/abs_efsh9stgvi/croot/gensim_1725376635600/work
+gensim ==4.3.3
 gosdt==1.0.4
 graphviz==0.21
 joblib==1.5.0
 kiwisolver==1.4.8
 matplotlib==3.10.3
-mkl-service==2.4.0
-mkl_fft @ file:///C:/Users/dev-admin/mkl/mkl_fft_1730823082242/work
-mkl_random @ file:///C:/Users/dev-admin/mkl/mkl_random_1730822522280/work
-numpy @ file:///C:/b/abs_c1ywpu18ar/croot/numpy_and_numpy_base_1708638681471/work/dist/numpy-1.26.4-cp310-cp310-win_amd64.whl#sha256=ebb5aa2b36d8afa5ec3231c19e5a1fc75b6d85e7db483f0fb9e77dad58469977
+numpy ==1.26.4
 packaging==25.0
 palmerpenguins==0.1.4
 pandas==2.2.3
@@ -26,10 +23,10 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 reportlab==4.4.2
 scikit-learn==1.6.1
-scipy @ file:///C:/Users/dev-admin/cr_scipy-feedstock/scipy_1733782725636/work/dist/scipy-1.13.1-cp310-cp310-win_amd64.whl#sha256=fd76e5a14ae7e66d4f64d41d9eea35679c89a5ff1e5050c7a8a6b197b322e141
+scipy ==1.13.1
 seaborn==0.13.2
 six==1.17.0
-smart-open @ file:///C:/ci/smart_open_1651235038100/work
+smart-open ==5.2.1
 sqlparse==0.5.3
 threadpoolctl==3.6.0
 typing_extensions==4.13.2

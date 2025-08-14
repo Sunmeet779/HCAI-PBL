@@ -1,30 +1,112 @@
-{% extends "project3/base.html" %}
-
-{% block content %}
+{% extends "project3/base.html" %} {% block content %}
 <div class="text-center mb-12">
-  <h1 class="text-4xl font-bold text-gray-800 mb-3">Penguin Species Classifier</h1>
-  <p class="text-xl text-gray-600">Explore model explainability techniques</p>
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">
+      Penguin Species Classifier
+    </h1>
+    <p class="text-xl text-gray-600 mb-6">
+      Explore model explainability techniques with the Palmer Penguins dataset
+    </p>
+    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 inline-block">
+      <p class="text-blue-800 flex items-center justify-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 mr-2"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Select a task below to begin exploring model explainability
+      </p>
+    </div>
+  </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+<div
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto"
+>
   {% for task in tasks %}
-  <a href="{% url task.url %}" 
-     class="card bg-white group relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-    <div class="p-6">
+  <a
+    href="{% url task.url %}"
+    class="card bg-white group relative overflow-hidden transform hover:-translate-y-1 transition-all duration-200"
+  >
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+    ></div>
+    <div class="relative p-6">
       <div class="flex justify-between items-start mb-4">
-        <h2 class="text-xl font-semibold text-gray-800">{{ task.title }}</h2>
-        <span class="badge {{ task.color }} text-white">
-          {{ task.label }}
-        </span>
+        <div>
+          <span class="badge {{ task.color }} mb-2"> {{ task.label }} </span>
+          <h2 class="text-xl font-semibold text-gray-800">{{ task.title }}</h2>
+        </div>
+        <div class="text-gray-400 group-hover:text-blue-500 transition-colors">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </div>
       </div>
-      <p class="text-gray-600 mb-4">{{ task.description }}</p>
-      <div class="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
-        <span class="mr-2">Explore</span>
-        <i class="fas fa-arrow-right"></i>
+      <p class="text-gray-600 mb-4 text-sm">{{ task.description }}</p>
+      <div
+        class="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors text-sm font-medium"
+      >
+        <span>Explore task</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 ml-1"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M14 5l7 7m0 0l-7 7m7-7H3"
+          />
+        </svg>
       </div>
     </div>
   </a>
   {% endfor %}
+</div>
+
+<div class="max-w-3xl mx-auto mt-12 bg-white rounded-lg shadow-sm p-6">
+  <h2 class="text-xl font-semibold text-gray-800 mb-4">About This Project</h2>
+  <p class="text-gray-600 mb-4">
+    This project demonstrates various explainability techniques in machine
+    learning using the Palmer Penguins dataset. The dataset contains
+    measurements for 344 penguins from three species observed on three islands
+    in the Palmer Archipelago, Antarctica.
+  </p>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+    <div class="bg-blue-50 p-4 rounded-lg">
+      <h3 class="font-medium text-blue-800 mb-1">Species</h3>
+      <p class="text-sm text-gray-600">Adelie, Chinstrap, Gentoo</p>
+    </div>
+    <div class="bg-green-50 p-4 rounded-lg">
+      <h3 class="font-medium text-green-800 mb-1">Features</h3>
+      <p class="text-sm text-gray-600">8 morphological measurements</p>
+    </div>
+    <div class="bg-purple-50 p-4 rounded-lg">
+      <h3 class="font-medium text-purple-800 mb-1">Models</h3>
+      <p class="text-sm text-gray-600">Decision Trees, Logistic Regression</p>
+    </div>
+  </div>
 </div>
 {% endblock %}

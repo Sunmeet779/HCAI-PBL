@@ -1,52 +1,237 @@
-{% extends "project3/base.html" %}
-
-{% block title %}Simple Decision Tree{% endblock %}
-{% block navigation %}
-<div class="mb-8">
-  <a href="{% url 'project3:index' %}" 
-     class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors">
-    <i class="fas fa-arrow-left mr-2"></i> Back to Tasks Overview
-  </a>
+{% extends "project3/base.html" %} {% block title %}Standard Decision Tree |
+Penguin Classifier{% endblock %} {% block navigation %}
+<div class="mb-6">
+  <nav class="flex" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2">
+      <li class="inline-flex items-center">
+        <a
+          href="{% url 'project3:index' %}"
+          class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-blue-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"
+            />
+          </svg>
+          Home
+        </a>
+      </li>
+      <li aria-current="page">
+        <div class="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-400"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2"
+            >Standard Decision Tree</span
+          >
+        </div>
+      </li>
+    </ol>
+  </nav>
 </div>
-{% endblock %}
-
-{% block content %}
-<div class="card bg-white">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-      <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
-          <h2 class="text-xl font-semibold mb-4 text-gray-800">Model Performance</h2>
-          <div class="space-y-3">
-              <div>
-                  <p class="text-sm text-gray-500">Accuracy</p>
-                  <p class="text-2xl font-bold text-blue-600">{{ accuracy }}</p>
-              </div>
-              <div>
-                  <p class="text-sm text-gray-500">Leaves</p>
-                  <p class="text-2xl font-bold text-blue-600">{{ n_leaves }}</p>
-              </div>
-          </div>
-      </div>
-      
-      <div class="bg-green-50 p-6 rounded-lg border border-green-100">
-          <h2 class="text-xl font-semibold mb-4 text-gray-800">Features Used</h2>
-          <ul class="space-y-2">
-              {% for feature in features %}
-              <li class="flex items-center">
-                  <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  <span>{{ feature }}</span>
-              </li>
-              {% endfor %}
-          </ul>
-      </div>
+{% endblock %} {% block content %}
+<div class="space-y-6">
+  <!-- Header -->
+  <div
+    class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4"
+  >
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Standard Decision Tree</h1>
+      <p class="text-gray-600 mt-1">
+        Fixed complexity decision tree classifier
+      </p>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="badge bg-blue-100 text-blue-800">Task 1</span>
+      <button class="tooltip text-gray-400 hover:text-gray-600">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span class="tooltip-text"
+          >This is a standard decision tree with fixed complexity (max depth=3).
+          It shows the baseline performance without any complexity
+          control.</span
+        >
+      </button>
+    </div>
   </div>
 
-  <div class="p-6 border-t border-gray-100">
-      <h2 class="text-xl font-semibold mb-4 text-gray-800">Decision Tree Visualization</h2>
-      <div class="tree-container">
-          <img src="data:image/png;base64,{{ tree_image }}" 
-               alt="Decision Tree" 
-               class="mx-auto shadow-sm">
+  <!-- Performance Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="card">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800">Model Performance</h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-blue-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
+          </svg>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500">Accuracy</p>
+            <p class="text-2xl font-bold text-blue-600">{{ accuracy }}</p>
+            <p class="text-xs text-gray-500 mt-1">Test set performance</p>
+          </div>
+          <div class="bg-green-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500">Leaves</p>
+            <p class="text-2xl font-bold text-green-600">{{ n_leaves }}</p>
+            <p class="text-xs text-gray-500 mt-1">Decision nodes</p>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800">Features Used</h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-green-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
+          </svg>
+        </div>
+        <div class="space-y-3">
+          {% for feature in features %}
+          <div class="flex items-center bg-gray-50 p-3 rounded-lg">
+            <div class="h-2 w-2 bg-blue-500 rounded-full mr-3"></div>
+            <span class="text-sm font-medium text-gray-700">{{ feature }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tree Visualization -->
+  <div class="card">
+    <div class="p-6 border-b border-gray-100">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-800">
+          Decision Tree Visualization
+        </h2>
+        <button
+          onclick="downloadBase64Image('{{ tree_image }}', 'standard_decision_tree.png')"
+          class="btn btn-outline text-sm px-3 py-1"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            />
+          </svg>
+          Download
+        </button>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="tree-container">
+        <img
+          src="data:image/png;base64,{{ tree_image }}"
+          alt="Decision Tree"
+          class="mx-auto"
+        />
+        <p class="text-sm text-gray-500 mt-4 text-center">
+          This decision tree shows how the model makes predictions based on
+          penguin features. Each node represents a decision point based on a
+          feature value.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interpretation -->
+  <div class="card">
+    <div class="p-6 border-b border-gray-100">
+      <h2 class="text-xl font-semibold text-gray-800">
+        How to Interpret This Tree
+      </h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <div class="h-3 w-3 bg-blue-500 rounded-full mr-2"></div>
+            <h4 class="font-medium text-blue-800">Decision Nodes</h4>
+          </div>
+          <p class="text-sm text-gray-600">
+            Show the feature and threshold used to split the data. The "samples"
+            value indicates how many penguins reach that node.
+          </p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <div class="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
+            <h4 class="font-medium text-green-800">Leaf Nodes</h4>
+          </div>
+          <p class="text-sm text-gray-600">
+            Show the final prediction (species) and the class distribution of
+            samples that reach that leaf.
+          </p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <div class="h-3 w-3 bg-purple-500 rounded-full mr-2"></div>
+            <h4 class="font-medium text-purple-800">Colors</h4>
+          </div>
+          <p class="text-sm text-gray-600">
+            Indicate the dominant species at each node (blue=Adelie,
+            green=Gentoo, red=Chinstrap).
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
