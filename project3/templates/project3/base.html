@@ -1,74 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}HCAI Project 3{% endblock %}</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}Penguin Classifier - HCAI Project 3{% endblock %}
+    </title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --secondary: #10b981;
-            --dark: #1e293b;
-            --light: #f8fafc;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-            color: var(--dark);
-        }
-        
+      :root {
+        --primary: #3b82f6;
+        --primary-light: #93c5fd;
+        --primary-dark: #1d4ed8;
+        --secondary: #10b981;
+        --accent: #8b5cf6;
+        --dark: #1e293b;
+        --light: #f8fafc;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+        color: var(--dark);
+        line-height: 1.6;
+      }
+
+      .card {
+        transition: all 0.2s ease;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(226, 232, 240, 0.7);
+        background: white;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .btn {
+        transition: all 0.2s ease;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-outline:hover {
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+
+      .tree-container {
+        overflow-x: auto;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(226, 232, 240, 0.7);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        height: 6px;
+        border-radius: 3px;
+        background: #e2e8f0;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      select,
+      input[type="number"],
+      input[type="text"] {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.2s;
+      }
+
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      .nav-link {
+        position: relative;
+        padding-bottom: 0.5rem;
+      }
+
+      .nav-link:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary);
+        transition: width 0.3s ease;
+      }
+
+      .nav-link:hover:after {
+        width: 100%;
+      }
+
+      .feature-change {
+        transition: all 0.3s ease;
+      }
+
+      .feature-change:hover {
+        transform: scale(1.05);
+      }
+
+      .tooltip {
+        position: relative;
+      }
+
+      .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: var(--dark);
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 0.5rem;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.875rem;
+        font-weight: normal;
+      }
+
+      .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      @media (max-width: 768px) {
         .card {
-            transition: all 0.3s ease;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          margin-bottom: 1.5rem;
         }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary);
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-light);
-            transform: translateY(-1px);
-        }
-        
-        .tree-container {
-            overflow-x: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            line-height: 1;
-        }
+      }
     </style>
-</head>
-<body class="min-h-screen">
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <header class="bg-white shadow-sm">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8 text-blue-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+              />
+            </svg>
+            <h1 class="text-xl font-bold text-gray-800">Penguin Classifier</h1>
+          </div>
+          <nav class="hidden md:flex space-x-6">
+            <a
+              href="{% url 'project3:index' %}"
+              class="nav-link text-gray-600 hover:text-blue-600"
+              >Overview</a
+            >
+            <a
+              href="{% url 'project3:simple_tree' %}"
+              class="nav-link text-gray-600 hover:text-blue-600"
+              >Decision Tree</a
+            >
+            <a
+              href="{% url 'project3:sparse_tree' %}"
+              class="nav-link text-gray-600 hover:text-blue-600"
+              >Pruned Tree</a
+            >
+            <a
+              href="{% url 'project3:logistic_regression' %}"
+              class="nav-link text-gray-600 hover:text-blue-600"
+              >Logistic Regression</a
+            >
+            <a
+              href="{% url 'project3:counterfactual' %}"
+              class="nav-link text-gray-600 hover:text-blue-600"
+              >Counterfactuals</a
+            >
+          </nav>
+          <a
+            href="{% url 'home:index' %}"
+            class="btn btn-outline ml-4 hidden md:inline-block"
+          >
+            <i class="fas fa-home mr-1"></i> Home
+          </a>
+          <button id="menu-btn" class="md:hidden text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div
+          id="mobile-menu"
+          class="md:hidden hidden bg-white shadow-md mt-2 rounded-lg"
+        >
+          <a
+            href="{% url 'project3:index' %}"
+            class="block px-4 py-2 text-gray-600 hover:bg-gray-100"
+            >Overview</a
+          >
+          <a
+            href="{% url 'project3:simple_tree' %}"
+            class="block px-4 py-2 text-gray-600 hover:bg-gray-100"
+            >Decision Tree</a
+          >
+          <a
+            href="{% url 'project3:sparse_tree' %}"
+            class="block px-4 py-2 text-gray-600 hover:bg-gray-100"
+            >Pruned Tree</a
+          >
+          <a
+            href="{% url 'project3:logistic_regression' %}"
+            class="block px-4 py-2 text-gray-600 hover:bg-gray-100"
+            >Logistic Regression</a
+          >
+          <a
+            href="{% url 'project3:counterfactual' %}"
+            class="block px-4 py-2 text-gray-600 hover:bg-gray-100"
+            >Counterfactuals</a
+          >
+          <a
+            href="{% url 'home:index' %}"
+            class="block px-4 py-2 text-blue-600 font-medium hover:bg-gray-100"
+          >
+            <i class="fas fa-home mr-1"></i> Home
+          </a>
+        </div>
+      </div>
+    </header>
+
     <main class="container mx-auto px-4 py-8 max-w-7xl">
-        {% block navigation %}{% endblock %}
-        {% block content %}{% endblock %}
+      {% block navigation %}{% endblock %} {% block content %}{% endblock %}
     </main>
-    
+
+    {% comment %}
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-4 md:mb-0">
+            <p class="text-gray-600">Human-Centric AI - Project 3</p>
+          </div>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-500 hover:text-blue-600">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="#" class="text-gray-500 hover:text-blue-600">
+              <i class="fas fa-question-circle"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    {% endcomment %}
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    {% block scripts %}{% endblock %}
-</body>
+    <script>
+      $(document).ready(function () {
+        $("#menu-btn").click(function () {
+          $("#mobile-menu").toggleClass("hidden");
+        });
+      });
+    </script>
+    {% block scripts %}{% endblock %} {% block extra_js %}
+    <script>
+      function downloadBase64Image(base64Data, filename) {
+        const link = document.createElement("a");
+        link.href = `data:image/png;base64,${base64Data}`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    </script>
+    {% endblock %}
+  </body>
 </html>

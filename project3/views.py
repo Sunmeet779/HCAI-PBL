@@ -4,6 +4,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend for rendering
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
@@ -30,7 +32,7 @@ plt.rcParams.update({
 def load_penguin_data():
     df = load_penguins().dropna()
     X = df[['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex']]
-    X['sex'] = X['sex'].map({'male': 0, 'female': 1})  # Encode sex
+    X.loc[:, 'sex'] = X['sex'].map({'male': 0, 'female': 1})  # Encode sex
     y = df['species']
     return X, y, df
 
@@ -211,16 +213,27 @@ def counterfactual_explanations(request):
     df = load_penguins().dropna()
     df['sex'] = df['sex'].map({'male': 0, 'female': 1})
     df['island'] = df['island'].astype('category').cat.codes
-    X = df.drop(columns=['species'])
+    # Define features explicitly to match expected order
+    X = df[['island', 'bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex']]
     y = df['species']
 
     # Identify columns
-    categorical_cols = ['sex', 'island']
-    continuous_cols = [col for col in X.columns if col not in categorical_cols]
+    categorical_cols = ['island', 'sex']
+    continuous_cols = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g']
 
-    # Scale features
+    # Scale only continuous features
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    X_continuous = X[continuous_cols].copy()
+    X_scaled_continuous = scaler.fit_transform(X_continuous)
+    
+    # Combine scaled continuous and unscaled categorical features
+    X_scaled = np.hstack([
+        X[['island']].values,  # island first
+        X_scaled_continuous,   # continuous features
+        X[['sex']].values      # sex last
+    ])
+    # print("X_scaled shape:", X_scaled.shape)  # Debugging
+    # print("X.columns:", X.columns.tolist())   # Debugging
 
     # Fit classifier
     clf = LogisticRegression(max_iter=1000)
@@ -229,69 +242,93 @@ def counterfactual_explanations(request):
     # Read parameters from request
     selected_id = int(request.GET.get('selected_id', 0))
     target_class = request.GET.get('target_class', y.unique()[0])
-    n_samples = int(request.GET.get('n_samples', 300))
+    n_samples = int(request.GET.get('n_samples', 1000))
     k_results = int(request.GET.get('k_results', 3))
 
     # Get the selected instance
     x_original = X_scaled[selected_id]
     original_class = y.iloc[selected_id]
-    original_features = dict(zip(X.columns, scaler.inverse_transform([x_original])[0]))
+    # Reconstruct original features
+    original_features = dict(zip(
+        X.columns,
+        np.hstack([
+            x_original[0:1],  # island (unscaled)
+            scaler.inverse_transform([x_original[1:1+len(continuous_cols)]])[0],  # continuous
+            x_original[-1:]   # sex
+        ])
+    ))
+    # print("Original features:", original_features)  # Debugging
+
+    # Calculate MAD for continuous features only
+    mad_continuous = median_abs_deviation(X_scaled[:, 1:1+len(continuous_cols)], axis=0)
+    mad = np.hstack([np.ones(1), mad_continuous, np.ones(1)])  # island, continuous, sex
+    # print("MAD values:", mad)  # Debugging
 
     # Generate counterfactuals
-    mad = median_abs_deviation(X_scaled, axis=0)
     counterfactuals = []
     rng = np.random.default_rng(42)
     X_df = X.reset_index(drop=True)
+    valid_predictions = 0
 
     for _ in range(n_samples):
         x_candidate = x_original.copy()
         # Add noise to continuous features
-        for i, col in enumerate(X.columns):
-            if col in continuous_cols:
-                x_candidate[i] += rng.normal(0, 0.5)
+        for i in range(1, 1 + len(continuous_cols)):
+            x_candidate[i] += rng.normal(0, 1.0)
         # For categorical features
-        for i, col in enumerate(X.columns):
-            if col in categorical_cols:
-                possible_vals = X_df[col].unique().tolist()
-                orig_val = scaler.inverse_transform([x_original])[0][i]
-                possible_vals = [v for v in possible_vals if v != round(orig_val)]
-                if possible_vals:
-                    new_val = rng.choice(possible_vals)
-                    mean = scaler.mean_[i]
-                    std = scaler.scale_[i]
-                    x_candidate[i] = (new_val - mean) / std
+        for col in categorical_cols:
+            idx = X.columns.get_loc(col)
+            possible_vals = X_df[col].unique().tolist()
+            orig_val = original_features[col]
+            possible_vals = [v for v in possible_vals if v != round(orig_val)]
+            if possible_vals:
+                x_candidate[idx] = rng.choice(possible_vals)
         pred = clf.predict([x_candidate])[0]
         if pred == target_class:
-            dist = np.sum(np.abs(x_candidate - x_original) / (mad + 1e-9))
-            inv_candidate = scaler.inverse_transform([x_candidate])[0]
-            changes = scaler.inverse_transform([x_candidate - x_original])[0]
+            valid_predictions += 1
+            dist_continuous = np.sum(
+                np.abs(x_candidate[1:1+len(continuous_cols)] - x_original[1:1+len(continuous_cols)]) / 
+                (mad_continuous + 1e-9)
+            )
+            dist_categorical = np.sum(
+                x_candidate[[0, -1]] != x_original[[0, -1]]
+            )
+            dist = dist_continuous + dist_categorical
+            inv_candidate = np.hstack([
+                x_candidate[0:1],  # island
+                scaler.inverse_transform([x_candidate[1:1+len(continuous_cols)]])[0],  # continuous
+                x_candidate[-1:]   # sex
+            ])
+            changes = inv_candidate - np.hstack([
+                x_original[0:1],
+                scaler.inverse_transform([x_original[1:1+len(continuous_cols)]])[0],
+                x_original[-1:]
+            ])
+            counterfactual_features = dict(zip(X.columns, inv_candidate))
+            # print("Counterfactual features:", counterfactual_features)  # Debugging
             counterfactuals.append({
-                'features': dict(zip(X.columns, inv_candidate)),
+                'features': counterfactual_features,
                 'distance': round(dist, 2),
                 'changes': dict(zip(X.columns, changes)),
             })
+    
+    # print(f"Valid counterfactuals found: {valid_predictions}/{n_samples}")
 
     # Sort and select top-k
     counterfactuals.sort(key=lambda x: x['distance'])
     top_counterfactuals = counterfactuals[:k_results]
 
-    # Create plot only if we have counterfactuals
+    # Create plot
     if top_counterfactuals:
         fig, ax = plt.subplots(figsize=(12, 6))
-        
-        # Prepare data for plotting
         features = list(original_features.keys())
         original_values = list(original_features.values())
-        
-        # Plot original values
         ax.plot(features, original_values, 
                 marker='o', 
                 linewidth=3, 
                 color='#3b82f6',
                 label='Original',
                 markersize=8)
-        
-                # Add explanatory text below the plot
         explanation = (
             "This plot shows how features must change to transform a "
             f"{original_class} penguin into a {target_class} penguin.\n"
@@ -300,16 +337,10 @@ def counterfactual_explanations(request):
             "The distance value indicates how much change is required "
             "(lower = more realistic transformation)."
         )
-        
         plt.figtext(0.5, -0.1, explanation, 
                    ha='center', 
                    fontsize=10,
                    bbox=dict(facecolor='#f8f9fa', edgecolor='#e5e7eb', boxstyle='round,pad=0.5'))
-        
-        plt.tight_layout(rect=[0, 0.1, 1, 1])  # Make room for explanation
-
-        
-        # Plot counterfactuals
         for i, cf in enumerate(top_counterfactuals):
             cf_values = list(cf['features'].values())
             ax.plot(features, cf_values,
@@ -319,8 +350,6 @@ def counterfactual_explanations(request):
                     alpha=0.6,
                     label=f'Counterfactual {i+1} (d={cf["distance"]})',
                     markersize=6)
-        
-        # Customize plot appearance
         ax.set_title(f'Counterfactual Feature Changes: {original_class} → {target_class}', pad=20)
         ax.legend(frameon=False, bbox_to_anchor=(1, 1))
         ax.spines['top'].set_visible(False)
@@ -331,8 +360,6 @@ def counterfactual_explanations(request):
         ax.grid(True, axis='y', color='#f1f5f9', linestyle='-', linewidth=0.5)
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
-        
-        # Convert plot to base64
         buf = BytesIO()
         fig.savefig(buf, format='png', bbox_inches='tight', dpi=120)
         plt.close(fig)
