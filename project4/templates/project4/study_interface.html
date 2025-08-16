@@ -7,12 +7,13 @@
     .rating-container {
         display: flex;
         justify-content: center;
-        gap: 15px;
-        margin: 20px 0;
+        gap: 10px;
+        margin: 15px 0;
+        flex-wrap: wrap;
     }
     .rating-btn {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -20,72 +21,157 @@
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s;
+        border: 2px solid transparent;
     }
-    .rating-btn:hover, .rating-btn.active {
+    .rating-btn:hover {
         transform: scale(1.1);
         box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .rating-btn.active {
+        transform: scale(1.15);
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        border-color: #fff;
     }
     .movie-card {
         border-radius: 15px;
         overflow: hidden;
         margin-bottom: 25px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        transition: transform 0.3s;
+        transition: transform 0.3s, box-shadow 0.3s;
+        background: #fff;
     }
     .movie-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
     .card-header {
         background: linear-gradient(135deg, #4361ee, #3a0ca3);
         color: white;
+        padding: 15px;
+        position: relative;
     }
-    .rec-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        font-size: 0.8rem;
+    .genre-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .impact-visualization {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        border-left: 4px solid #4361ee;
+    }
+    .similar-movie {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background: rgba(0,0,0,0.03);
+    }
+    .similar-movie:hover {
+        background: rgba(67, 97, 238, 0.1);
+    }
+    .progress-container {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        margin: 15px 0;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4cc9f0, #4895ef);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    .predicted-rec {
+        animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card shadow-lg">
+<div class="card shadow-lg border-0">
     <div class="card-header text-white">
-        <h2 class="mb-0">Rate Movies</h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Rate Movies</h2>
+            <span class="badge bg-light text-dark">
+                <i class="fas fa-film me-1"></i>
+                {{ movies|length }} movies to rate
+            </span>
+        </div>
     </div>
     
     <div class="card-body">
-        <form method="post" action="{% url 'project4:submit_ratings' %}">
+        <form method="post" action="{% url 'project4:submit_ratings' %}" id="rating-form">
             {% csrf_token %}
             
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Rate movies on a scale of 0.5 to 5.0 stars. Your ratings will help personalize recommendations.
+            <div class="alert alert-info d-flex align-items-center">
+                <i class="fas fa-info-circle me-3 fa-2x"></i>
+                <div>
+                    <h5 class="alert-heading">How this works</h5>
+                    <p class="mb-0">
+                        Rate movies on a scale of 0.5 to 5.0 stars. As you rate, you'll see how your choices 
+                        influence the recommendations. The more you rate, the better our suggestions become!
+                    </p>
+                </div>
             </div>
             
             <div class="row">
                 {% for movie in movies %}
                 <div class="col-md-6 mb-4">
-                    <div class="movie-card card h-100">
+                    <div class="movie-card card h-100" data-movie="{{ movie.movieId }}">
                         <div class="card-header position-relative">
-                            <h5 class="card-title mb-0">{{ movie.title }}</h5>
-                            <span class="rec-badge badge bg-warning">Movie {{ forloop.counter }}</span>
+                            <h5 class="card-title mb-2">{{ movie.title }} ({{ movie.year }})</h5>
+                            <div class="genre-container mb-2">
+                                {% for genre in movie.genres|slice:":3" %}
+                                <span class="genre-badge">{{ genre }}</span>
+                                {% endfor %}
+                            </div>
+                            <span class="badge bg-warning position-absolute top-0 end-0">
+                                {{ forloop.counter }}/{{ movies|length }}
+                            </span>
                         </div>
                         <div class="card-body">
                             <div class="text-center mb-3">
-                                <p class="text-muted mb-1">How would you rate this movie?</p>
+                                <p class="text-muted mb-2">How would you rate this movie?</p>
                                 <div class="rating-container">
                                     {% for value in "0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0"|split:"," %}
                                     <div class="rating-btn 
                                         {% if value == '3.0' %}bg-primary text-white active{% else %}bg-light{% endif %}" 
                                         data-value="{{ value }}"
-                                        data-movie="{{ movie.movieId }}">
+                                        data-movie="{{ movie.movieId }}"
+                                        onclick="rateMovie(this, '{{ movie.movieId }}')">
                                         {{ value }}
                                     </div>
                                     {% endfor %}
                                 </div>
                                 <input type="hidden" name="rating_{{ movie.movieId }}" 
                                     id="rating_{{ movie.movieId }}" value="3.0">
+                            </div>
+                            <div class="impact-visualization" id="impact_{{ movie.movieId }}">
+                                <h6><i class="fas fa-chart-line me-2"></i>Rating Impact Preview</h6>
+                                <p class="small text-muted">
+                                    If you rate this movie <span class="fw-bold">3.0</span>, you might like:
+                                </p>
+                                <div class="similar-movies-container" id="similar_{{ movie.movieId }}">
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border text-primary spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span class="ms-2">Loading predictions...</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,7 +180,7 @@
             </div>
             
             <div class="text-center mt-4">
-                <button type="submit" class="btn btn-primary btn-lg px-5">
+                <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
                     <i class="fas fa-paper-plane me-2"></i>Submit Ratings
                 </button>
             </div>
@@ -103,18 +189,24 @@
         {% if recommendations %}
         <div class="mt-5 pt-4 border-top">
             <h3 class="mb-4"><i class="fas fa-trophy me-2 text-warning"></i>Your Personalized Recommendations</h3>
-            
-            <div class="alert alert-success">
-                <i class="fas fa-lightbulb me-2"></i>
-                Based on your ratings, here are movies we think you'll enjoy:
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="fas fa-lightbulb me-3 fa-2x"></i>
+                <div>
+                    <h5 class="alert-heading">Based on your ratings</h5>
+                    <p class="mb-0">Here are movies we think you'll enjoy. The more you rate, the better these get!</p>
+                </div>
             </div>
-            
             <div class="row">
                 {% for rec in recommendations %}
-                <div class="col-lg-4 col-md-6 mb-4">
+                <div class="col-lg-4 col-md-6 mb-4 predicted-rec">
                     <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title">{{ rec.title }}</h5>
+                            <div class="genre-container mb-3">
+                                {% for genre in rec.genres|slice:":3" %}
+                                <span class="genre-badge">{{ genre }}</span>
+                                {% endfor %}
+                            </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="badge bg-info">
                                     Match: {{ rec.score|floatformat:2 }}/5
@@ -136,7 +228,6 @@
                 </div>
                 {% endfor %}
             </div>
-            
             <div class="text-center mt-4">
                 <a href="{% url 'project4:index' %}" class="btn btn-outline-primary">
                     <i class="fas fa-home me-2"></i>Return to Home
@@ -150,30 +241,86 @@
 
 {% block extra_scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Rating selection functionality
-    document.querySelectorAll('.rating-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const movieId = this.dataset.movie;
-            const value = this.dataset.value;
-            
-            // Update active state
-            this.parentElement.querySelectorAll('.rating-btn').forEach(b => {
-                b.classList.remove('active', 'bg-primary', 'text-white');
-            });
-            this.classList.add('active', 'bg-primary', 'text-white');
-            
-            // Update hidden input
-            document.getElementById(`rating_${movieId}`).value = value;
-        });
+function rateMovie(btn, movieId) {
+    const value = btn.dataset.value;
+    btn.parentElement.querySelectorAll('.rating-btn').forEach(b => {
+        b.classList.remove('active', 'bg-primary', 'text-white');
     });
-    
-    // Add split filter for Django templates
-    django_filters = {
-        split: function(value, arg) {
-            return value.split(arg);
+    btn.classList.add('active', 'bg-primary', 'text-white');
+    document.getElementById(`rating_${movieId}`).value = value;
+    updateImpactVisualization(movieId, value);
+}
+
+function updateImpactVisualization(movieId, rating) {
+    const impactDiv = document.getElementById(`impact_${movieId}`);
+    const similarDiv = document.getElementById(`similar_${movieId}`);
+    similarDiv.innerHTML = `
+        <div class="text-center py-2">
+            <div class="spinner-border text-primary spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Calculating impact...</span>
+        </div>
+    `;
+    impactDiv.querySelector('p').innerHTML = `
+        If you rate this movie <span class="fw-bold">${rating}</span>, we'll recommend:
+    `;
+    fetch(`/project4/predict_impact/?movie_id=${movieId}&rating=${rating}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+        },
+        method: 'GET',
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'success' && data.recommendations.length > 0) {
+            let html = '<div class="recommendations-grid">';
+            data.recommendations.forEach(rec => {
+                const starRating = Math.round(rec.score);
+                const stars = '<i class="fas fa-star text-warning"></i>'.repeat(starRating) +
+                             '<i class="far fa-star text-warning"></i>'.repeat(5 - starRating);
+                html += `
+                <div class="recommendation-item p-2 mb-2 border rounded">
+                    <div class="d-flex justify-content-between">
+                        <strong>${rec.title}</strong>
+                        <span class="badge bg-primary">${rec.score.toFixed(1)}</span>
+                    </div>
+                    <small class="text-muted d-block">${rec.genres}</small>
+                    <div class="mt-1">${stars}</div>
+                </div>
+                `;
+            });
+            html += '</div>';
+            similarDiv.innerHTML = html;
+        } else {
+            similarDiv.innerHTML = `
+                <div class="text-center py-3 text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Rate more movies to see better recommendations
+                </div>
+            `;
         }
-    };
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        similarDiv.innerHTML = `
+            <div class="text-center py-3 text-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Error loading recommendations
+            </div>
+        `;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.movie-card').forEach(card => {
+        const movieId = card.querySelector('.rating-btn').dataset.movie;
+        updateImpactVisualization(movieId, '3.0');
+    });
 });
 </script>
 {% endblock %}
