@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import TrainingSession, Trajectory, HumanFeedback
 
-# Register your models here.
+admin.site.register(TrainingSession)
+admin.site.register(Trajectory)
+admin.site.register(HumanFeedback)
