@@ -1,0 +1,442 @@
+{% extends "project5/base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-gradient py-5 mb-5 rounded-3" style="background: #ffffff !important; color: #212529 !important; border: 1px solid #dee2e6;">
+    <div class="container text-center">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mx-auto">
+                <div class="hero-image mb-4">
+                    <div class="mouse-cheese-illustration">
+                        <div class="mouse-container">
+                            🐭
+                            <div class="cheese-container">
+                                🧀
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h1 class="display-4 fw-bold mb-3" style="color: #212529 !important;">
+                    Reinforcement Learning with Human Feedback
+                </h1>
+                <p class="lead mb-4" style="color: #495057 !important;">
+                    Train an intelligent mouse agent using RLHF techniques. 
+                    Watch as the AI learns not just from rewards, but from human preferences!
+                </p>
+                <a href="{% url 'project5:start_training' %}" class="btn btn-dark btn-lg px-4 py-2" id="startTrainingBtn">
+                    <i class="fas fa-rocket me-2"></i>
+                    <span class="btn-text">Start Training</span>
+                    <div class="btn-loader d-none">
+                        <div class="spinner-border spinner-border-sm me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        Starting...
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- Project Overview -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-info-circle text-primary me-2"></i>
+                    Project Overview
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-4">
+                    This advanced AI project demonstrates the power of Reinforcement Learning with Human Feedback (RLHF), 
+                    a technique used in training modern AI systems like ChatGPT. Our mouse agent learns to navigate 
+                    a grid world through three sophisticated phases:
+                </p>
+                
+                <!-- Training Phases -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="training-phase p-3 rounded-3 h-100">
+                            <div class="phase-icon mb-3">
+                                <i class="fas fa-graduation-cap fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold">Phase 1: REINFORCE</h5>
+                            <p class="small text-muted mb-0">
+                                Initial policy learning using the REINFORCE algorithm to collect rewards.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="training-phase p-3 rounded-3 h-100">
+                            <div class="phase-icon mb-3">
+                                <i class="fas fa-users fa-2x text-success"></i>
+                            </div>
+                            <h5 class="fw-bold">Phase 2: Human Feedback</h5>
+                            <p class="small text-muted mb-0">
+                                Bradley-Terry model learns from human preferences between trajectories.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="training-phase p-3 rounded-3 h-100">
+                            <div class="phase-icon mb-3">
+                                <i class="fas fa-sync fa-2x text-warning"></i>
+                            </div>
+                            <h5 class="fw-bold">Phase 3: Policy Refinement</h5>
+                            <p class="small text-muted mb-0">
+                                Final policy optimization using KL divergence penalty for stability.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="{% url 'project5:start_training' %}" class="btn btn-primary btn-lg" id="beginTrainingBtn">
+                        <i class="fas fa-play me-2"></i>
+                        <span class="btn-text">Begin RLHF Training</span>
+                        <div class="btn-loader d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            Starting...
+                        </div>
+                    </a>
+                    <button class="btn btn-outline-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                        <i class="fas fa-question-circle me-2"></i>Learn More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Environment Guide -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-map text-success me-2"></i>
+                    Environment Guide
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="environment-elements">
+                    <div class="element-item d-flex align-items-center mb-3 p-2 rounded-2">
+                        <div class="element-icon me-3">
+                            <div class="grid-preview mouse">M</div>
+                        </div>
+                        <div>
+                            <strong>Mouse Agent</strong>
+                            <div class="small text-muted">The AI learning to navigate</div>
+                        </div>
+                    </div>
+                    
+                    <div class="element-item d-flex align-items-center mb-3 p-2 rounded-2">
+                        <div class="element-icon me-3">
+                            <div class="grid-preview cheese">C</div>
+                        </div>
+                        <div>
+                            <strong>Regular Cheese</strong>
+                            <div class="small text-muted">+10 reward points</div>
+                        </div>
+                    </div>
+                    
+                    <div class="element-item d-flex align-items-center mb-3 p-2 rounded-2">
+                        <div class="element-icon me-3">
+                            <div class="grid-preview organic">O</div>
+                        </div>
+                        <div>
+                            <strong>Organic Cheese</strong>
+                            <div class="small text-muted">+10 reward (RLHF learns to avoid)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="element-item d-flex align-items-center mb-3 p-2 rounded-2">
+                        <div class="element-icon me-3">
+                            <div class="grid-preview trap">T</div>
+                        </div>
+                        <div>
+                            <strong>Trap</strong>
+                            <div class="small text-muted">-50 penalty points</div>
+                        </div>
+                    </div>
+                    
+                    <div class="element-item d-flex align-items-center mb-3 p-2 rounded-2">
+                        <div class="element-icon me-3">
+                            <div class="grid-preview wall">#</div>
+                        </div>
+                        <div>
+                            <strong>Wall</strong>
+                            <div class="small text-muted">Blocks movement</div>
+                        </div>
+                    </div>
+                    
+                    <div class="element-item d-flex align-items-center mb-2 p-2 rounded-2">
+                        <div class="element-icon me-3">
+                            <div class="grid-preview empty">.</div>
+                        </div>
+                        <div>
+                            <strong>Empty Space</strong>
+                            <div class="small text-muted">-0.2 step penalty</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar text-info me-2"></i>
+                    Project Stats
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="stats-grid">
+                    <div class="stat-item text-center mb-3">
+                        <div class="stat-number text-primary fw-bold">3</div>
+                        <div class="stat-label small text-muted">Algorithm Phases</div>
+                    </div>
+                    <div class="stat-item text-center mb-3">
+                        <div class="stat-number text-success fw-bold">5×5</div>
+                        <div class="stat-label small text-muted">Grid Environment</div>
+                    </div>
+                    <div class="stat-item text-center mb-3">
+                        <div class="stat-number text-warning fw-bold">PyTorch</div>
+                        <div class="stat-label small text-muted">ML Framework</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- About Modal -->
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aboutModalLabel">
+                    <i class="fas fa-brain me-2"></i>About RLHF Technology
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Reinforcement Learning with Human Feedback (RLHF)</strong> is an AI training technique that combines:</p>
+                <ul>
+                    <li><strong>Traditional RL:</strong> Learning from environmental rewards</li>
+                    <li><strong>Human Preferences:</strong> Learning from human judgments about behavior quality</li>
+                    <li><strong>Preference Modeling:</strong> Using Bradley-Terry models to understand human preferences</li>
+                </ul>
+                <p>This technique is used in training modern AI systems like ChatGPT, Claude, and other advanced language models to better align with human values and preferences.</p>
+                <p><strong>In this project:</strong> The mouse learns to prefer regular cheese over organic cheese through human feedback, even though both provide equal environmental rewards!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'project5:start_training' %}" class="btn btn-primary">Start Training</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.training-phase {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.training-phase:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.phase-icon {
+    text-align: center;
+}
+
+.element-item {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.element-item:hover {
+    background-color: #e9ecef;
+}
+
+.grid-preview {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 2px solid #dee2e6;
+}
+
+.grid-preview.mouse { background-color: #007bff; color: white; }
+.grid-preview.cheese { background-color: #ffc107; color: #212529; }
+.grid-preview.organic { background-color: #28a745; color: white; }
+.grid-preview.trap { background-color: #dc3545; color: white; }
+.grid-preview.wall { background-color: #6c757d; color: white; }
+.grid-preview.empty { background-color: #f8f9fa; color: #6c757d; }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 3rem 0 !important;
+    }
+    
+    .display-4 {
+        font-size: 2rem !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mouse-cheese-illustration {
+        font-size: 3rem !important;
+    }
+}
+
+/* Loading button styles */
+.btn-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn.loading .btn-text {
+    display: none;
+}
+
+.btn.loading .btn-loader {
+    display: flex !important;
+}
+
+/* Mouse and Cheese Illustration */
+.mouse-cheese-illustration {
+    font-size: 4rem;
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mouse-container {
+    position: relative;
+    display: inline-block;
+    animation: mouseMove 3s ease-in-out infinite;
+}
+
+.cheese-container {
+    position: absolute;
+    top: -10px;
+    right: -30px;
+    animation: cheeseFloat 2s ease-in-out infinite alternate;
+}
+
+@keyframes mouseMove {
+    0% { transform: translateX(-10px) rotate(-5deg); }
+    50% { transform: translateX(10px) rotate(5deg); }
+    100% { transform: translateX(-10px) rotate(-5deg); }
+}
+
+@keyframes cheeseFloat {
+    0% { transform: translateY(0px) rotate(0deg); }
+    100% { transform: translateY(-5px) rotate(5deg); }
+}
+
+.hero-image {
+    animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+// Add loading functionality to training buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const startTrainingBtn = document.getElementById('startTrainingBtn');
+    const beginTrainingBtn = document.getElementById('beginTrainingBtn');
+    
+    function addLoadingState(button) {
+        button.addEventListener('click', function(e) {
+            // Add loading class
+            this.classList.add('loading');
+            
+            // Hide the text and show loader
+            const btnText = this.querySelector('.btn-text');
+            const btnLoader = this.querySelector('.btn-loader');
+            
+            if (btnText) btnText.style.display = 'none';
+            if (btnLoader) {
+                btnLoader.classList.remove('d-none');
+                btnLoader.style.display = 'flex';
+            }
+            
+            // Disable the button to prevent multiple clicks
+            this.style.pointerEvents = 'none';
+        });
+    }
+    
+    if (startTrainingBtn) {
+        addLoadingState(startTrainingBtn);
+    }
+    
+    if (beginTrainingBtn) {
+        addLoadingState(beginTrainingBtn);
+    }
+});
+</script>
+{% endblock %}

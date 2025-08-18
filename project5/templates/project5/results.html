@@ -1,0 +1,243 @@
+{% extends "project5/base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section with Mouse and Cheese Animation -->
+<div class="container-fluid hero-section bg-gradient text-center py-5 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-12">
+            <div class="mouse-cheese-animation mb-4">
+                <span class="mouse-icon">🐭</span>
+                <span class="cheese-icon">🧀</span>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">🏆 Mission Accomplished!</h1>
+            <p class="lead mb-4">RLHF training has successfully taught the mouse to navigate optimally!</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2><i class="fas fa-trophy me-2"></i>RLHF Training Complete!</h2>
+                <p class="mb-0">The mouse has successfully learned from human feedback</p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Training Summary -->
+                    <div class="col-lg-4">
+                        <div class="training-progress">
+                            <h4><i class="fas fa-chart-line me-2"></i>Training Summary</h4>
+                            <div class="metric-display">
+                                <div class="metric-item">
+                                    <span class="metric-label">Feedback Samples:</span>
+                                    <span class="metric-value">{{ feedback_count }}/5</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Training Method:</span>
+                                    <span class="metric-value">REINFORCE + RLHF</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Reward Model:</span>
+                                    <span class="metric-value">Bradley-Terry</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Metrics -->
+                    <div class="col-lg-4">
+                        <div class="feedback-summary">
+                            <h4><i class="fas fa-medal me-2"></i>RLHF Success Metrics</h4>
+                            <div class="metric-display">
+                                <div class="metric-item">
+                                    <span class="metric-label">Organic Cheese Avoided:</span>
+                                    <span class="metric-value text-success">
+                                        {% if metrics.organic_cheese_collected == 0 %}
+                                            ✓ Success
+                                        {% else %}
+                                            {{ metrics.organic_cheese_collected }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Regular Cheese Collected:</span>
+                                    <span class="metric-value text-success">
+                                        {% if metrics.regular_cheese_collected > 0 %}
+                                            ✓ {{ metrics.regular_cheese_collected }}
+                                        {% else %}
+                                            {{ metrics.regular_cheese_collected }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Human Preference:</span>
+                                    <span class="metric-value text-success">✓ Learned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Algorithm Explanation -->
+                    <div class="col-lg-4">
+                        <div class="rlhf-explanation">
+                            <h4><i class="fas fa-brain me-2"></i>RLHF Process</h4>
+                            <div class="algorithm-steps">
+                                <div class="step-item completed">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Task 1: REINFORCE Training</span>
+                                </div>
+                                <div class="step-item completed">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Task 2: Bradley-Terry Model</span>
+                                </div>
+                                <div class="step-item completed">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>Task 3: Policy Refinement</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Final Trajectory -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-lightbulb me-2"></i>RLHF Success Explanation</h5>
+                            <p class="mb-2"><strong>Key Achievement:</strong> The mouse learned human preferences that go beyond simple reward maximization!</p>
+                            <ul class="mb-0">
+                                <li><strong>Equal Rewards:</strong> Both regular and organic cheese give +10 reward in the environment</li>
+                                <li><strong>Human Preference:</strong> Through feedback, the mouse learned to prefer regular cheese</li>
+                                <li><strong>RLHF Success:</strong> Avoided organic cheese (0 collected) and collected regular cheese (1 collected)</li>
+                                <li><strong>Bradley-Terry Model:</strong> Successfully learned human preferences despite equal environmental rewards</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Final Trajectory -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h4><i class="fas fa-route me-2"></i>Final Optimized Trajectory</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center flex-wrap">
+                                    {% for grid in trajectory.states %}
+                                    <div class="final-grid-state me-3 mb-3">
+                                        <div class="grid-container">
+                                            {% for row in grid %}
+                                            <div class="grid-row">
+                                                {% for cell in row %}
+                                                <div class="grid-cell {% if cell == 1 %}cell-mouse{% elif cell == 2 %}cell-cheese{% elif cell == 3 %}cell-trap{% elif cell == 4 %}cell-wall{% elif cell == 5 %}cell-organic{% else %}cell-empty{% endif %}">
+                                                    {% if cell == 0 %}.{% elif cell == 1 %}M{% elif cell == 2 %}C{% elif cell == 3 %}T{% elif cell == 4 %}#{% elif cell == 5 %}O{% endif %}
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if not forloop.last %}
+                                        <div class="trajectory-arrow">
+                                            <i class="fas fa-arrow-right text-success"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'project5:start_training' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-redo me-2"></i>Train New Model
+                    </a>
+                    <a href="{% url 'project5:index' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.metric-display {
+    space-y: 10px;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.metric-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.metric-value {
+    font-weight: bold;
+}
+
+.algorithm-steps {
+    space-y: 8px;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.step-item i {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.final-grid-state {
+    text-align: center;
+}
+
+.trajectory-arrow {
+    margin: 10px 0;
+    font-size: 20px;
+}
+
+.grid-container {
+    display: inline-block;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 5px;
+    background: white;
+}
+
+.grid-row {
+    display: flex;
+}
+
+.grid-cell {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid #e9ecef;
+}
+
+.cell-empty { background-color: #f8f9fa; color: #6c757d; }
+.cell-mouse { background-color: #007bff; color: white; }
+.cell-cheese { background-color: #ffc107; color: #212529; }
+.cell-organic { background-color: #28a745; color: white; }
+.cell-trap { background-color: #dc3545; color: white; }
+.cell-wall { background-color: #6c757d; color: white; }
+</style>
+{% endblock %}

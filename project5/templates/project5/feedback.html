@@ -1,0 +1,392 @@
+{% extends "project5/base.html" %} {% load static %} {% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h2><i class="fas fa-thumbs-up me-2"></i>Human Feedback Collection</h2>
+        <p class="mb-0">
+          Help the mouse learn to prefer organic cheese over regular cheese!
+        </p>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info">
+          <h5><i class="fas fa-info-circle me-2"></i>Instructions</h5>
+          <p class="mb-1">
+            <strong>Goal:</strong> Train the mouse to prefer organic cheese (O)
+            over regular cheese (C)
+          </p>
+          <p class="mb-1">
+            <strong>Legend:</strong> M=Mouse, C=Regular Cheese, O=Organic
+            Cheese, T=Trap, #=Wall, .=Empty
+          </p>
+          <p class="mb-0">
+            <strong>Progress:</strong> {{ feedback_count }}/5 feedback samples
+            collected
+          </p>
+        </div>
+
+        <div class="row mt-4">
+          <!-- Trajectory 1 -->
+          <div class="col-lg-6 mb-4">
+            <div class="card h-100 trajectory-card">
+              <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                  <i class="fas fa-route me-2"></i>Trajectory A
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="trajectory-visualization mb-3">
+                  {% for grid in trajectory1.states %}
+                  <div class="grid-state mb-2">
+                    <div class="grid-container">
+                      {% for row in grid %}
+                      <div class="grid-row">
+                        {% for cell in row %}
+                        <div class="grid-cell {% if cell == 1 %}cell-mouse{% elif cell == 2 %}cell-cheese{% elif cell == 3 %}cell-trap{% elif cell == 4 %}cell-wall{% elif cell == 5 %}cell-organic{% else %}cell-empty{% endif %}">
+                          {% if cell == 0 %}.{% elif cell == 1 %}M{% elif cell == 2 %}C{% elif cell == 3 %}T{% elif cell == 4 %}#{% elif cell == 5 %}O{% endif %}
+                        </div>
+                        {% endfor %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                    {% if not forloop.last %}
+                    <div class="action-arrow">
+                      <i class="fas fa-arrow-down text-primary"></i>
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="trajectory-metrics">
+                  <div class="row text-center">
+                    <div class="col-4">
+                      <div class="metric-box">
+                        <i class="fas fa-star text-warning"></i>
+                        <br /><strong>{{ trajectory1.total_reward }}</strong>
+                        <br /><small>Total Reward</small>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="metric-box">
+                        <i class="fas fa-leaf text-success"></i>
+                        <br /><strong
+                          >{{ trajectory1.organic_cheese_collected }}</strong
+                        >
+                        <br /><small>Organic Cheese</small>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="metric-box">
+                        <i class="fas fa-cheese text-warning"></i>
+                        <br /><strong
+                          >{{ trajectory1.regular_cheese_collected }}</strong
+                        >
+                        <br /><small>Regular Cheese</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <form method="post" class="mt-3" id="feedbackForm1">
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="trajectory1_id"
+                    value="{{ trajectory1.id }}"
+                  />
+                  <input
+                    type="hidden"
+                    name="trajectory2_id"
+                    value="{{ trajectory2.id }}"
+                  />
+                  <input
+                    type="hidden"
+                    name="preferred"
+                    value="{{ trajectory1.id }}"
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-success btn-lg w-100 preference-btn"
+                    id="preferBtn1"
+                  >
+                    <span class="btn-text">
+                      <i class="fas fa-thumbs-up me-2"></i>I Prefer This
+                      Trajectory
+                    </span>
+                    <div class="btn-loader d-none">
+                      <div class="spinner-border spinner-border-sm me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      Processing Feedback...
+                    </div>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trajectory 2 -->
+          <div class="col-lg-6 mb-4">
+            <div class="card h-100 trajectory-card">
+              <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                  <i class="fas fa-route me-2"></i>Trajectory B
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="trajectory-visualization mb-3">
+                  {% for grid in trajectory2.states %}
+                  <div class="grid-state mb-2">
+                    <div class="grid-container">
+                      {% for row in grid %}
+                      <div class="grid-row">
+                        {% for cell in row %}
+                        <div
+                          class="grid-cell {% if cell == 1 %}cell-mouse {% elif cell == 2 %}cell-cheese {% elif cell == 3 %}cell-trap {% elif cell == 4 %}cell-wall {% elif cell == 5 %}cell-organic {% else %}cell-empty{% endif %}"
+                        >
+                          {% if cell == 0 %}.{% elif cell == 1 %}M{% elif cell == 2 %}C{% elif cell == 3 %}T{% elif cell == 4 %}#{% elif cell == 5 %}O{% endif %}
+                        </div>
+                        {% endfor %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                    {% if not forloop.last %}
+                    <div class="action-arrow">
+                      <i class="fas fa-arrow-down text-primary"></i>
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <div class="trajectory-metrics">
+                  <div class="row text-center">
+                    <div class="col-4">
+                      <div class="metric-box">
+                        <i class="fas fa-star text-warning"></i>
+                        <br /><strong>{{ trajectory2.total_reward }}</strong>
+                        <br /><small>Total Reward</small>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="metric-box">
+                        <i class="fas fa-leaf text-success"></i>
+                        <br /><strong
+                          >{{ trajectory2.organic_cheese_collected }}</strong
+                        >
+                        <br /><small>Organic Cheese</small>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="metric-box">
+                        <i class="fas fa-cheese text-warning"></i>
+                        <br /><strong
+                          >{{ trajectory2.regular_cheese_collected }}</strong
+                        >
+                        <br /><small>Regular Cheese</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <form method="post" class="mt-3" id="feedbackForm2">
+                  {% csrf_token %}
+                  <input
+                    type="hidden"
+                    name="trajectory1_id"
+                    value="{{ trajectory1.id }}"
+                  />
+                  <input
+                    type="hidden"
+                    name="trajectory2_id"
+                    value="{{ trajectory2.id }}"
+                  />
+                  <input
+                    type="hidden"
+                    name="preferred"
+                    value="{{ trajectory2.id }}"
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-success btn-lg w-100 preference-btn"
+                    id="preferBtn2"
+                  >
+                    <span class="btn-text">
+                      <i class="fas fa-thumbs-up me-2"></i>I Prefer This
+                      Trajectory
+                    </span>
+                    <div class="btn-loader d-none">
+                      <div class="spinner-border spinner-border-sm me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      Processing Feedback...
+                    </div>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <div class="progress mb-3" style="height: 25px">
+            <div
+              class="progress-bar bg-success"
+              role="progressbar"
+              style="width: {{ feedback_percentage }}%"
+              aria-valuenow="{{ feedback_count }}"
+              aria-valuemin="0"
+              aria-valuemax="5"
+            >
+              {{ feedback_count }}/5 Feedback Collected
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .trajectory-card {
+    transition: transform 0.3s;
+  }
+
+  .trajectory-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .grid-container {
+    display: inline-block;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 5px;
+    background: white;
+  }
+
+  .grid-row {
+    display: flex;
+  }
+
+  .grid-cell {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    border: 1px solid #e9ecef;
+  }
+
+  .cell-empty {
+    background-color: #f8f9fa;
+    color: #6c757d;
+  }
+  .cell-mouse {
+    background-color: #007bff;
+    color: white;
+  }
+  .cell-cheese {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  .cell-organic {
+    background-color: #28a745;
+    color: white;
+  }
+  .cell-trap {
+    background-color: #dc3545;
+    color: white;
+  }
+  .cell-wall {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .action-arrow {
+    text-align: center;
+    margin: 5px 0;
+  }
+
+  .metric-box {
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+  }
+
+  .preference-btn {
+    transition: all 0.3s;
+  }
+
+  .preference-btn:hover {
+    transform: scale(1.05);
+  }
+
+  .grid-state {
+    text-align: center;
+  }
+
+  /* Loading button styles for feedback */
+  .btn-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .btn.loading .btn-text {
+    display: none;
+  }
+
+  .btn.loading .btn-loader {
+    display: flex !important;
+  }
+
+  .btn-success.loading {
+    background-color: #28a745;
+    border-color: #28a745;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const feedbackForm1 = document.getElementById('feedbackForm1');
+    const feedbackForm2 = document.getElementById('feedbackForm2');
+    const preferBtn1 = document.getElementById('preferBtn1');
+    const preferBtn2 = document.getElementById('preferBtn2');
+    
+    function addLoadingToButton(form, button) {
+        if (form && button) {
+            form.addEventListener('submit', function(e) {
+                // Add loading state to button
+                button.classList.add('loading');
+                
+                // Hide the text and show loader
+                const btnText = button.querySelector('.btn-text');
+                const btnLoader = button.querySelector('.btn-loader');
+                
+                if (btnText) btnText.style.display = 'none';
+                if (btnLoader) {
+                    btnLoader.classList.remove('d-none');
+                    btnLoader.style.display = 'flex';
+                }
+                
+                // Disable both buttons to prevent double submission
+                if (preferBtn1) preferBtn1.disabled = true;
+                if (preferBtn2) preferBtn2.disabled = true;
+            });
+        }
+    }
+    
+    // Add loading functionality to both forms
+    addLoadingToButton(feedbackForm1, preferBtn1);
+    addLoadingToButton(feedbackForm2, preferBtn2);
+});
+</script>
+{% endblock %}
