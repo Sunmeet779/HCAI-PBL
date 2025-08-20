@@ -66,8 +66,8 @@
 
             <!-- Submit Button -->
             <div class="md:col-span-1 flex items-end">
-                <button type="submit" class="w-full btn-primary text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all">
-                    <i class="fas fa-play mr-2"></i>
+                <button type="submit" onclick="handleRunButton()" class="w-full btn-primary text-white py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                    <i class="fas fa-play mr-2"></i>Run
                 </button>
             </div>
         </form>
@@ -110,7 +110,7 @@
 
     <!-- Visualization Section -->
     {% if plot_url %}
-    <div class="card bg-white rounded-xl shadow-sm overflow-hidden">
+    <div id="visualization-section" class="card bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <h3 class="text-lg font-semibold text-gray-800">Counterfactual Visualization</h3>
@@ -234,9 +234,27 @@
 
 {% block scripts %}
 <script>
-    // Add any interactive JavaScript here if needed
+    function handleRunButton() {
+        // Store a flag to indicate we should scroll after page reload
+        sessionStorage.setItem('scrollToVisualization', 'true');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Tooltips or other interactive elements can be added here
+        // Check if we need to scroll to visualization after page reload
+        if (sessionStorage.getItem('scrollToVisualization') === 'true') {
+            sessionStorage.removeItem('scrollToVisualization');
+            
+            // Wait a bit for the page to fully load, then scroll
+            setTimeout(function() {
+                const visualizationSection = document.getElementById('visualization-section');
+                if (visualizationSection) {
+                    visualizationSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }, 500);
+        }
     });
 </script>
 {% endblock %}
