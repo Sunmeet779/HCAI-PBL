@@ -9,13 +9,29 @@ from gensim.models import Word2Vec
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
+# LDA Performance Settings - adjust these for speed vs accuracy tradeoff
+LDA_FAST_MODE = True  # Set to False for higher accuracy, True for faster training
+LDA_SAMPLE_SIZE = 10000 if LDA_FAST_MODE else None  # Smaller dataset for faster training
+LDA_MAX_FEATURES = 800 if LDA_FAST_MODE else 2000   # Vocabulary size
+LDA_N_COMPONENTS = 15 if LDA_FAST_MODE else 30      # Number of topics
+LDA_MAX_ITER = 2 if LDA_FAST_MODE else 5            # Training iterations
+
 MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models')
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'IMDB Dataset.csv')
 
-def load_imdb_dataset():
-    """Load and preprocess the IMDB dataset"""
+def load_imdb_dataset(sample_size=None):
+    """Load and preprocess the IMDB dataset
+    
+    Args:
+        sample_size: If provided, randomly sample this many records for faster training
+    """
     df = pd.read_csv(DATA_PATH)
     df['sentiment'] = df['sentiment'].map({'positive': 1, 'negative': 0})
+    
+    # For LDA baseline training, we can use a smaller sample to speed up development
+    if sample_size is not None and len(df) > sample_size:
+        df = df.sample(n=sample_size, random_state=42)
+    
     return df['review'], df['sentiment']
 
 def document_vector(doc, model):
@@ -42,9 +58,30 @@ def initialize_vectorizer(model_type, X_train):
         X_vec = np.array([document_vector(text, model) for text in X_train])
         return model, X_vec
     elif model_type == 'lda':
-        count_vectorizer = CountVectorizer(max_features=5000)
+        # Optimized CountVectorizer with configurable parameters
+        count_vectorizer = CountVectorizer(
+            max_features=LDA_MAX_FEATURES,  # Configurable vocabulary size
+            min_df=3,          # Remove very rare words
+            max_df=0.85,       # Remove very common words  
+            stop_words='english',  # Remove stop words
+            ngram_range=(1, 1)     # Only unigrams for LDA (faster)
+        )
         X_counts = count_vectorizer.fit_transform(X_train)
-        lda = LatentDirichletAllocation(n_components=50, max_iter=5, random_state=42)
+        
+        # Highly optimized LDA parameters
+        lda = LatentDirichletAllocation(
+            n_components=LDA_N_COMPONENTS,  # Configurable number of topics
+            max_iter=LDA_MAX_ITER,          # Configurable iterations
+            learning_method='online',       # Faster online learning
+            batch_size=256,                 # Larger batches for efficiency
+            n_jobs=-1,                     # Use all CPU cores
+            random_state=42,
+            evaluate_every=1,              # Evaluate less frequently
+            perp_tol=2e-2,                # More tolerant convergence (faster)
+            learning_offset=20.,           # Faster initial learning
+            learning_decay=0.6             # Faster learning decay
+        )
+        
         X_vec = lda.fit_transform(X_counts)
         return {'count_vectorizer': count_vectorizer, 'lda': lda}, X_vec
     else:
