@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from sklearn.linear_model import LogisticRegression
 from sklearn.base import clone
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from sklearn.metrics import accuracy_score
 from gensim.models import Word2Vec
 from .model_utils import save_model, load_model, update_metadata, list_models, load_metadata
@@ -72,6 +72,55 @@ def train_model(request, model_type):
         return JsonResponse({'error': str(e)}, status=500)
 
 @csrf_exempt
+def train_baseline_model(request, model_type):
+    """Train a baseline model on the full dataset (Task 1)"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+    
+    try:
+        # Load full dataset
+        X, y = load_imdb_dataset()
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        # Initialize vectorizer and transform data
+        vectorizer, X_vec = initialize_vectorizer(model_type, X_train)
+        
+        # Train classifier on FULL training set (this is the baseline)
+        clf = LogisticRegression(max_iter=1000, random_state=42)
+        clf.fit(X_vec, y_train)
+        
+        # Evaluate on test set
+        X_test_vec = transform_text(X_test, vectorizer, model_type)
+        accuracy = accuracy_score(y_test, clf.predict(X_test_vec))
+        
+        # Save baseline model with special naming
+        filename = f"baseline_{model_type}_{accuracy:.4f}_{int(time.time())}.pkl"
+        save_model(clf, filename)
+        
+        # Save vectorizer
+        if model_type in ['tfidf', 'bow', 'lda']:
+            vec_filename = f"baseline_{model_type}_vectorizer_{int(time.time())}.pkl"
+            save_model(vectorizer, vec_filename)
+        elif model_type == 'word2vec':
+            vec_filename = f"baseline_word2vec_model_{int(time.time())}.bin"
+            vectorizer.save(os.path.join(MODEL_DIR, vec_filename))
+        
+        # Update metadata
+        update_metadata(f"baseline_{model_type}", filename, accuracy)
+        
+        return JsonResponse({
+            'status': 'success',
+            'model_type': model_type,
+            'accuracy': accuracy,
+            'filename': filename,
+            'samples_used': len(X_train),
+            'baseline': True
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
 def load_pretrained_model(request):
     """Load a pretrained model"""
     if request.method != 'POST':
@@ -126,6 +175,7 @@ def load_pretrained_model(request):
             'X_text': X_train.values,
             'X_vec': X_vec,
             'y': y_train.values,
+            'X_test': X_test.values,  # Store test features separately
             'y_test': y_test.values,
             'labeled_indices': labeled_indices,
             'unlabeled_indices': unlabeled_indices,
@@ -190,13 +240,15 @@ def start_active_learning(request):
         # Initialize vectorizer
         vectorizer, X_vec = initialize_vectorizer(model_type, X_train)
         
-        # Create initial labeled pool
-        indices = np.random.permutation(len(X_train))
-        labeled_indices = indices[:initial_size]
-        unlabeled_indices = indices[initial_size:]
+        # Create initial labeled pool with stratified sampling for better balance
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=(len(X_train) - initial_size) / len(X_train), random_state=42)
+        labeled_idx, unlabeled_idx = next(sss.split(X_train, y_train))
         
-        # Initialize classifier
-        clf = LogisticRegression(max_iter=1000)
+        labeled_indices = labeled_idx
+        unlabeled_indices = unlabeled_idx
+        
+        # Initialize classifier with class balance
+        clf = LogisticRegression(max_iter=1000, class_weight='balanced')
         clf.fit(X_vec[labeled_indices], y_train.iloc[labeled_indices])
         
         # Store session
@@ -208,6 +260,7 @@ def start_active_learning(request):
             'X_text': X_train.values,
             'X_vec': X_vec,
             'y': y_train.values,
+            'X_test': X_test.values,  # Store test features separately
             'y_test': y_test.values,
             'labeled_indices': labeled_indices.tolist(),
             'unlabeled_indices': unlabeled_indices.tolist(),
@@ -327,14 +380,14 @@ def submit_labels(request):
             if idx in batch_indices:
                 session['y'][idx] = int(label)
         
-        # Retrain model
-        clf = clone(session['clf'])
+        # Retrain model with class balancing for better performance
+        clf = LogisticRegression(max_iter=1000, class_weight='balanced')
         X_labeled = session['X_vec'][labeled_indices]
         y_labeled = session['y'][labeled_indices]
         clf.fit(X_labeled, y_labeled)
         
-        # Evaluate
-        X_test_vec = transform_text(session['X_text'][:len(session['y_test'])], session['vectorizer'], session['model_type'])
+        # Evaluate on consistent test set (use stored test data)
+        X_test_vec = transform_text(session['X_test'], session['vectorizer'], session['model_type'])
         acc = accuracy_score(session['y_test'], clf.predict(X_test_vec))
         
         # Update session
@@ -342,6 +395,12 @@ def submit_labels(request):
         session['history']['accuracy'].append(acc)
         session['history']['samples'].append(len(labeled_indices))
         del session['current_batch']
+        
+        # Calculate class balance for diagnostics
+        y_labeled = session['y'][labeled_indices]
+        pos_count = np.sum(y_labeled == 1)
+        neg_count = np.sum(y_labeled == 0)
+        class_balance = f"{pos_count}pos/{neg_count}neg"
         
         # For pretrained models, maintain all samples as labeled
         if session.get('pretrained', False):
@@ -353,6 +412,8 @@ def submit_labels(request):
             'accuracy': acc,
             'samples_labeled': len(labeled_indices),
             'samples_remaining': len(unlabeled_indices),
+            'class_balance': class_balance,
+            'training_size': len(labeled_indices),
             'history': session['history']
         })
         

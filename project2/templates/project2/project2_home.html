@@ -68,104 +68,190 @@
         transform: translateX(100%);
         transition: all 300ms ease-in;
       }
+      
+      /* Label Button Styles */
+      .label-btn {
+        cursor: pointer;
+        user-select: none;
+        border: 2px solid transparent;
+      }
+      
+      .label-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .label-btn.active-label {
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      
+      /* Checkbox styling when labeled */
+      .review-card input[type="checkbox"]:checked {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+      }
+      
+      /* Navigation Bar Styling */
+      .nav-link {
+        transition: all 0.2s ease;
+      }
+      
+      .nav-link:hover {
+        transform: translateY(-1px);
+      }
+      
+      .start-over-btn {
+        transition: all 0.2s ease;
+      }
+      
+      .start-over-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
     </style>
   </head>
   <body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+          <!-- Left side - Back to Projects -->
+          <div class="flex items-center">
+            <a href="/projects/" class="nav-link flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+              <i class="fas fa-arrow-left mr-2"></i>
+              <span class="font-medium">Back to Projects</span>
+            </a>
+          </div>
+          
+          <!-- Center - Project Title -->
+          <div class="flex items-center">
+            <i class="fas fa-brain mr-2 text-blue-500"></i>
+            <h1 class="text-lg font-semibold text-gray-800">Project 2: Active Learning</h1>
+          </div>
+          
+          <!-- Right side - Start Over Button -->
+          <div class="flex items-center space-x-4">
+            <button id="start-over-btn" class="start-over-btn flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+              <i class="fas fa-redo mr-2"></i>
+              <span>Start Over</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">Active Learning System</h1>
-        <p class="text-gray-600">IMDB Sentiment Analysis</p>
+        <p class="text-gray-600">IMDB Sentiment Analysis - Three-Task Approach</p>
+      </div>
+
+      <!-- Task Progress Indicator -->
+      <div class="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-center">Project Workflow</h2>
+        
+        <!-- Explanation -->
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+          <h3 class="font-medium text-blue-900 mb-2">📚 Tasks</h3>
+          <div class="text-sm text-blue-800 space-y-1">
+            <p><strong>Task 1:</strong> Train a baseline classifier on the full labeled dataset to establish a "target score"</p>
+            <p><strong>Task 2:</strong> Implement Active Learning with small initial labeled set and query strategies</p>
+            <p><strong>Task 3:</strong> Interactive labeling to compare AL efficiency vs baseline</p>
+          </div>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <div class="flex-1 text-center">
+            <div id="task1-indicator" class="w-12 h-12 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center">
+              <span class="text-white font-bold">1</span>
+            </div>
+            <p class="text-sm font-medium">Task 1: Baseline Classifier</p>
+            <p class="text-xs text-gray-500">Train full supervised model</p>
+          </div>
+          <div class="flex-1 border-t-2 border-gray-300 mx-4 mt-6"></div>
+          <div class="flex-1 text-center">
+            <div id="task2-indicator" class="w-12 h-12 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center">
+              <span class="text-white font-bold">2</span>
+            </div>
+            <p class="text-sm font-medium">Task 2: Active Learning</p>
+            <p class="text-xs text-gray-500">Implement AL strategies</p>
+          </div>
+          <div class="flex-1 border-t-2 border-gray-300 mx-4 mt-6"></div>
+          <div class="flex-1 text-center">
+            <div id="task3-indicator" class="w-12 h-12 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center">
+              <span class="text-white font-bold">3</span>
+            </div>
+            <p class="text-sm font-medium">Task 3: Test & Compare</p>
+            <p class="text-xs text-gray-500">Interactive labeling & analysis</p>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Pretrained Models Panel -->
+        <!-- Task 1: Baseline Model Training Panel -->
         <div class="bg-white p-6 rounded-lg shadow">
           <h2 class="text-xl font-semibold mb-4 flex items-center">
-            <i class="fas fa-upload mr-2 text-blue-500"></i> Load Pretrained
-            Model
+            <i class="fas fa-cog mr-2 text-blue-500"></i> Task 1: Baseline Classifier
           </h2>
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Model Type</label
-              >
-              <select
-                id="pretrained-model-type"
-                class="w-full p-2 border rounded"
-              >
-                <option value="">Select a model type</option>
-                <option value="tfidf">TF-IDF</option>
-                <option value="bow">Bag of Words</option>
-                <option value="word2vec">Word2Vec</option>
-                <option value="lda">LDA</option>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Text Representation</label>
+              <select id="baseline-model-type" class="w-full p-2 border rounded">
+                <option value="tfidf">TF-IDF (Term Frequency-Inverse Document Frequency)</option>
+                <option value="bow">Bag of Words (Simple word counts)</option>
+                <option value="word2vec">Word2Vec (Dense word embeddings)</option>
+                <option value="lda">LDA (Latent Dirichlet Allocation topics)</option>
               </select>
-            </div>
-            <div id="pretrained-models-container" class="hidden">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Select Model</label
-              >
-              <select
-                id="pretrained-model-select"
-                class="w-full p-2 border rounded"
-              ></select>
+              <div class="text-xs text-gray-500 mt-1">
+                <span id="model-description">TF-IDF: Weighs word importance by frequency vs rarity across documents</span>
+              </div>
             </div>
             <button
-              id="load-pretrained-btn"
-              class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50"
-              disabled
-            >
-              <i class="fas fa-upload mr-2"></i> Load Model
-            </button>
-            <div
-              id="pretrained-results"
-              class="hidden p-3 bg-gray-50 rounded text-sm"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Model Training Panel -->
-        <div class="bg-white p-6 rounded-lg shadow">
-          <h2 class="text-xl font-semibold mb-4 flex items-center">
-            <i class="fas fa-cog mr-2 text-blue-500"></i> Model Configuration
-          </h2>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Model Type</label
-              >
-              <select id="model-type" class="w-full p-2 border rounded">
-                <option value="tfidf">TF-IDF</option>
-                <option value="bow">Bag of Words</option>
-                <option value="word2vec">Word2Vec</option>
-                <option value="lda">LDA</option>
-              </select>
-            </div>
-            <button
-              id="train-btn"
+              id="train-baseline-btn"
               class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
             >
-              <i class="fas fa-play-circle mr-2"></i> Train Model
+              <i class="fas fa-play-circle mr-2"></i> Train Baseline Model
             </button>
-            <div
-              id="train-results"
-              class="hidden p-3 bg-gray-50 rounded text-sm"
-            ></div>
+            <div id="baseline-results" class="hidden p-3 bg-gray-50 rounded text-sm"></div>
+            
+            <!-- Load Pretrained Model Option -->
+            <div class="border-t pt-4 mt-4">
+              <h3 class="text-sm font-medium text-gray-700 mb-2">Or Load Pretrained Baseline</h3>
+              <div class="space-y-2">
+                <select id="pretrained-model-type" class="w-full p-2 border rounded text-sm">
+                  <option value="">Select model type...</option>
+                  <option value="tfidf">TF-IDF</option>
+                  <option value="bow">Bag of Words</option>
+                  <option value="word2vec">Word2Vec</option>
+                  <option value="lda">LDA</option>
+                </select>
+                <div id="pretrained-models-container" class="hidden">
+                  <select id="pretrained-model-select" class="w-full p-2 border rounded text-sm"></select>
+                </div>
+                <button
+                  id="load-pretrained-btn"
+                  class="w-full bg-gray-500 text-white py-1 px-3 rounded hover:bg-gray-600 disabled:opacity-50 text-sm"
+                  disabled
+                >
+                  <i class="fas fa-upload mr-2"></i> Load Pretrained Model
+                </button>
+                <div id="pretrained-results" class="hidden p-2 bg-gray-50 rounded text-xs"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Active Learning Panel -->
+        <!-- Task 2: Active Learning Panel -->
         <div class="bg-white p-6 rounded-lg shadow">
           <h2 class="text-xl font-semibold mb-4 flex items-center">
-            <i class="fas fa-lightbulb mr-2 text-purple-500"></i> Active
-            Learning
+            <i class="fas fa-lightbulb mr-2 text-purple-500"></i> Task 2: Active Learning
           </h2>
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Strategy</label
-              >
+              <label class="block text-sm font-medium text-gray-700 mb-1">Query Strategy</label>
               <select id="al-strategy" class="w-full p-2 border rounded">
-                <option value="random">Random Sampling</option>
+                <option value="random">Random Sampling (Baseline)</option>
                 <option value="uncertainty">Uncertainty Sampling</option>
                 <option value="margin">Margin Sampling</option>
                 <option value="entropy">Entropy Sampling</option>
@@ -173,9 +259,7 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >Batch Size</label
-                >
+                <label class="block text-sm font-medium text-gray-700 mb-1">Batch Size</label>
                 <input
                   type="number"
                   id="batch-size"
@@ -186,9 +270,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >Initial Pool</label
-                >
+                <label class="block text-sm font-medium text-gray-700 mb-1">Initial Pool</label>
                 <input
                   type="number"
                   id="initial-pool"
@@ -201,10 +283,80 @@
             </div>
             <button
               id="start-al"
-              class="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition-colors"
+              class="w-full bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 transition-colors disabled:opacity-50"
+              disabled
             >
               <i class="fas fa-rocket mr-2"></i> Start Active Learning
             </button>
+            <div class="text-xs text-gray-500">
+              <i class="fas fa-info-circle mr-1"></i> 
+              Complete Task 1 first to enable Active Learning
+            </div>
+          </div>
+        </div>
+
+        <!-- Task 3: Testing & Comparison Panel -->
+        <div class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2 text-green-500"></i> Task 3: Test & Compare
+          </h2>
+          <div class="space-y-4">
+            
+            <!-- Baseline Performance Display -->
+            <div id="baseline-performance" class="hidden">
+              <div class="bg-blue-100 p-3 rounded">
+                <p class="text-sm font-medium text-blue-800">🎯 Target Score (Baseline)</p>
+                <p class="text-lg font-bold text-blue-900" id="target-accuracy">--</p>
+                <p class="text-xs text-blue-600" id="baseline-details">Model: -- | Full Dataset</p>
+              </div>
+            </div>
+
+            <!-- Current AL Performance -->
+            <div id="al-performance" class="hidden">
+              <div class="bg-purple-100 p-3 rounded">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-purple-800">🚀 Active Learning</p>
+                  <button class="text-purple-600 hover:text-purple-800" title="Why does accuracy fluctuate?&#10;&#10;• Small training sets can be noisy&#10;• Active Learning explores difficult samples&#10;• Class imbalance affects performance&#10;• Real improvement shows over time">
+                    <i class="fas fa-question-circle text-xs"></i>
+                  </button>
+                </div>
+                <p class="text-lg font-bold text-purple-900" id="current-accuracy">--</p>
+                <p class="text-xs text-purple-600" id="al-details">Strategy: -- | Samples: --</p>
+                <div class="mt-2 text-xs">
+                  <div class="flex justify-between">
+                    <span>Class Balance:</span>
+                    <span id="class-balance">--</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Training Size:</span>
+                    <span id="training-size">--</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comparison -->
+            <div id="comparison-display" class="hidden">
+              <div class="flex justify-between items-center p-3 bg-gray-100 rounded">
+                <span class="text-sm font-medium">Efficiency:</span>
+                <span id="efficiency-score" class="font-bold">--</span>
+              </div>
+            </div>
+
+            <!-- Stopping Conditions -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700">Stopping Conditions</label>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-xs text-gray-600">Max Queries</label>
+                  <input type="number" id="max-queries" value="110" min="10" max="500" class="w-full p-1 border rounded text-sm">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600">Target Accuracy</label>
+                  <input type="number" id="target-acc" value="0.85" min="0.5" max="1.0" step="0.01" class="w-full p-1 border rounded text-sm">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -212,8 +364,7 @@
       <!-- Results Panel -->
       <div class="bg-white p-6 rounded-lg shadow mt-6">
         <h2 class="text-xl font-semibold mb-4 flex items-center">
-          <i class="fas fa-chart-line mr-2 text-green-500"></i> Learning
-          Progress
+          <i class="fas fa-chart-line mr-2 text-green-500"></i> Learning Progress & Comparison
         </h2>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 h-64">
@@ -221,79 +372,66 @@
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-blue-50 p-3 rounded">
-              <p class="text-xs text-blue-600">Labeled Samples</p>
-              <p id="labeled-count" class="text-xl font-bold">0</p>
-            </div>
-            <div class="bg-green-50 p-3 rounded">
-              <p class="text-xs text-green-600">Accuracy</p>
-              <p id="accuracy" class="text-xl font-bold">0%</p>
-            </div>
-            <div class="bg-yellow-50 p-3 rounded">
-              <p class="text-xs text-yellow-600">Model Type</p>
-              <p id="current-model-type" class="text-xl font-bold">-</p>
+              <p class="text-xs text-blue-600">Baseline Target</p>
+              <p id="baseline-display" class="text-xl font-bold">--</p>
             </div>
             <div class="bg-purple-50 p-3 rounded">
-              <p class="text-xs text-purple-600">Learning Strategy</p>
+              <p class="text-xs text-purple-600">Current AL</p>
+              <p id="current-al-display" class="text-xl font-bold">--</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded">
+              <p class="text-xs text-green-600">Labeled Samples</p>
+              <p id="labeled-count" class="text-xl font-bold">0</p>
+            </div>
+            <div class="bg-yellow-50 p-3 rounded">
+              <p class="text-xs text-yellow-600">Strategy</p>
               <p id="current-strategy-display" class="text-xl font-bold">-</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Samples to Label -->
-      <div
-        id="samples-panel"
-        class="hidden mt-6 bg-white p-6 rounded-lg shadow"
-      >
+      <!-- Samples to Label (Task 3: Interactive Testing) -->
+      <div id="samples-panel" class="hidden mt-6 bg-white p-6 rounded-lg shadow">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">Samples to Label</h2>
+          <h2 class="text-xl font-semibold">
+            <i class="fas fa-hand-pointer mr-2 text-green-500"></i>
+            Task 3: Interactive Sample Labeling
+          </h2>
           <div class="text-sm text-gray-500">
-            Strategy:
-            <span id="current-strategy" class="font-medium">Random</span>
-            <span id="pretrained-badge" class="pretrained-badge hidden"
-              >Pretrained</span
-            >
+            Strategy: <span id="current-strategy" class="font-medium">Random</span>
+            <span id="pretrained-badge" class="pretrained-badge hidden">Pretrained</span>
           </div>
         </div>
+        
+        <!-- Progress towards stopping conditions -->
+        <div class="mb-4 p-3 bg-gray-50 rounded">
+          <div class="flex justify-between text-sm">
+            <span>Progress to Target</span>
+            <span id="stopping-progress">0 / 110 queries</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+            <div id="stopping-progress-bar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+        
         <div class="mb-4">
           <div class="flex justify-between text-sm text-gray-600 mb-1">
-            <span
-              >Selected: <span id="selected-count">0</span>/<span
-                id="total-count"
-                >0</span
-              ></span
-            >
-            <button
-              id="select-all-btn"
-              class="text-blue-600 hover:text-blue-800"
-            >
-              Select All
-            </button>
+            <span>Selected: <span id="selected-count">0</span>/<span id="total-count">0</span></span>
+            <button id="select-all-btn" class="text-blue-600 hover:text-blue-800">Select All</button>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              id="selection-progress"
-              class="bg-blue-600 h-2.5 rounded-full"
-              style="width: 0%"
-            ></div>
+            <div id="selection-progress" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
           </div>
         </div>
-        <div
-          id="samples-container"
-          class="space-y-3 max-h-96 overflow-y-auto pr-2"
-        ></div>
+        
+        <div id="samples-container" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+        
         <div class="mt-4 flex justify-between items-center">
-          <button
-            id="skip-batch"
-            class="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300 transition-colors"
-          >
+          <button id="skip-batch" class="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300 transition-colors">
             <i class="fas fa-forward mr-2"></i> Skip Batch
           </button>
-          <button
-            id="submit-labels"
-            class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors disabled:opacity-50"
-            disabled
-          >
+          <button id="submit-labels" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors disabled:opacity-50" disabled>
             <i class="fas fa-check-circle mr-2"></i> Submit Labels
           </button>
         </div>
@@ -301,7 +439,7 @@
     </div>
 
     <script>
-      // Initialize Chart
+      // Initialize Chart with baseline reference line
       const ctx = document.getElementById("learning-curve").getContext("2d");
       const chart = new Chart(ctx, {
         type: "line",
@@ -309,16 +447,26 @@
           labels: [],
           datasets: [
             {
-              label: "Accuracy",
+              label: "Active Learning",
               data: [],
-              borderColor: "#4F46E5",
-              backgroundColor: "rgba(79, 70, 229, 0.1)",
+              borderColor: "#9333EA",
+              backgroundColor: "rgba(147, 51, 234, 0.1)",
               fill: true,
               tension: 0.4,
-              pointBackgroundColor: "#4F46E5",
+              pointBackgroundColor: "#9333EA",
               pointRadius: 4,
               pointHoverRadius: 6,
             },
+            {
+              label: "Baseline Target",
+              data: [],
+              borderColor: "#3B82F6",
+              backgroundColor: "transparent",
+              borderDash: [5, 5],
+              fill: false,
+              pointRadius: 0,
+              pointHoverRadius: 0,
+            }
           ],
         },
         options: {
@@ -346,12 +494,12 @@
             tooltip: {
               callbacks: {
                 label: function (context) {
-                  return `Accuracy: ${(context.raw * 100).toFixed(2)}%`;
+                  return `${context.dataset.label}: ${(context.raw * 100).toFixed(2)}%`;
                 },
               },
             },
             legend: {
-              display: false,
+              display: true,
             },
           },
         },
@@ -361,48 +509,77 @@
       let currentSessionId = "default";
       let currentBatchSize = 5;
       let activeAlerts = [];
+      let baselineAccuracy = null;
+      let currentModelType = null;
+      let queryCount = 0;
+      let maxQueries = 110;
+      let targetAccuracy = 0.85;
 
       // DOM elements
-      const pretrainedModelType = document.getElementById(
-        "pretrained-model-type"
-      );
-      const pretrainedModelsContainer = document.getElementById(
-        "pretrained-models-container"
-      );
-      const pretrainedModelSelect = document.getElementById(
-        "pretrained-model-select"
-      );
+      const baselineModelType = document.getElementById("baseline-model-type");
+      const trainBaselineBtn = document.getElementById("train-baseline-btn");
+      const baselineResults = document.getElementById("baseline-results");
+      const startAlBtn = document.getElementById("start-al");
+      const currentStrategyDisplay = document.getElementById("current-strategy-display");
+      
+      // Pretrained model elements
+      const pretrainedModelType = document.getElementById("pretrained-model-type");
+      const pretrainedModelsContainer = document.getElementById("pretrained-models-container");
+      const pretrainedModelSelect = document.getElementById("pretrained-model-select");
       const loadPretrainedBtn = document.getElementById("load-pretrained-btn");
       const pretrainedResults = document.getElementById("pretrained-results");
-      const currentModelTypeDisplay =
-        document.getElementById("current-model-type");
-      const currentStrategyDisplay = document.getElementById(
-        "current-strategy-display"
-      );
-      const pretrainedBadge = document.getElementById("pretrained-badge");
 
       // Event Listeners
-      document
-        .getElementById("train-btn")
-        .addEventListener("click", trainModel);
-      document
-        .getElementById("start-al")
-        .addEventListener("click", startActiveLearning);
-      document
-        .getElementById("submit-labels")
-        .addEventListener("click", submitLabels);
-      document
-        .getElementById("skip-batch")
-        .addEventListener("click", skipBatch);
-      document
-        .getElementById("select-all-btn")
-        .addEventListener("click", toggleSelectAll);
+      trainBaselineBtn.addEventListener("click", trainBaselineModel);
+      startAlBtn.addEventListener("click", startActiveLearning);
+      document.getElementById("submit-labels").addEventListener("click", submitLabels);
+      document.getElementById("skip-batch").addEventListener("click", skipBatch);
+      document.getElementById("select-all-btn").addEventListener("click", toggleSelectAll);
+      document.getElementById("start-over-btn").addEventListener("click", startOver);
+      
+      // Pretrained model event listeners
       pretrainedModelType.addEventListener("change", loadModelOptions);
       loadPretrainedBtn.addEventListener("click", loadPretrainedModel);
+      
+      // Model description updates
+      baselineModelType.addEventListener("change", function() {
+        const descriptions = {
+          'tfidf': 'TF-IDF: Weighs word importance by frequency vs rarity across documents',
+          'bow': 'Bag of Words: Simple word counts without considering word importance',
+          'word2vec': 'Word2Vec: Dense vector representations capturing semantic relationships',
+          'lda': 'LDA: Topic modeling approach using latent topics as features'
+        };
+        document.getElementById('model-description').textContent = descriptions[this.value];
+      });
+      
+      // Update stopping conditions
+      document.getElementById("max-queries").addEventListener("change", function() {
+        maxQueries = parseInt(this.value);
+        updateStoppingProgress();
+      });
+      
+      document.getElementById("target-acc").addEventListener("change", function() {
+        targetAccuracy = parseFloat(this.value);
+      });
 
       // Update selected count when checkboxes change
       document.addEventListener("change", function (e) {
         if (e.target.matches('#samples-container input[type="checkbox"]')) {
+          // If checkbox is unchecked, reset button styles
+          if (!e.target.checked) {
+            const reviewCard = e.target.closest('.review-card');
+            const allButtons = reviewCard.querySelectorAll('.label-btn');
+            allButtons.forEach(button => {
+              button.classList.remove('active-label');
+              if (button.dataset.label === '0') {
+                button.className = 'label-btn bg-red-100 text-red-800 px-2 py-1 text-xs rounded hover:bg-red-200 transition-colors';
+              } else {
+                button.className = 'label-btn bg-green-100 text-green-800 px-2 py-1 text-xs rounded hover:bg-green-200 transition-colors';
+              }
+            });
+            // Clear the label
+            e.target.dataset.label = '';
+          }
           updateSelectionCount();
         }
       });
@@ -418,11 +595,234 @@
 
       // Initialize
       document.addEventListener("DOMContentLoaded", function () {
-        currentBatchSize = parseInt(
-          document.getElementById("batch-size").value
-        );
-        document.getElementById("total-count").textContent = currentBatchSize;
+        currentBatchSize = parseInt(document.getElementById("batch-size").value);
+        maxQueries = parseInt(document.getElementById("max-queries").value);
+        targetAccuracy = parseFloat(document.getElementById("target-acc").value);
+        updateTaskIndicators();
       });
+
+      // Task 1: Train Baseline Model
+      async function trainBaselineModel() {
+        const modelType = baselineModelType.value;
+        const originalBtnContent = trainBaselineBtn.innerHTML;
+
+        trainBaselineBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Training Baseline...';
+        trainBaselineBtn.disabled = true;
+        baselineResults.innerHTML = "";
+        baselineResults.classList.remove("hidden");
+
+        try {
+          const response = await fetch(`/project2/train-baseline/${modelType}/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            baselineAccuracy = data.accuracy;
+            currentModelType = modelType;
+            
+            baselineResults.innerHTML = `
+              <div class="p-3 bg-green-50 text-green-800 rounded">
+                <p class="font-medium">✅ Baseline Training Complete!</p>
+                <p><strong>Model:</strong> ${modelType.toUpperCase()}</p>
+                <p><strong>Target Accuracy:</strong> ${(data.accuracy * 100).toFixed(2)}%</p>
+                
+              </div>
+            `;
+            
+            // Update UI
+            updateTaskIndicators();
+            updateBaselineDisplay();
+            
+            // Enable Task 2
+            startAlBtn.disabled = false;
+            startAlBtn.parentElement.querySelector('.text-xs').innerHTML = 
+              '<i class="fas fa-check-circle mr-1 text-green-500"></i> Ready to start Active Learning';
+            
+            showAlert("Baseline model trained successfully! You can now start Active Learning.", "success");
+          } else {
+            baselineResults.innerHTML = `
+              <div class="p-3 bg-red-50 text-red-800 rounded">
+                <p class="font-medium">❌ Training Failed</p>
+                <p>${data.error || "Unknown error during training"}</p>
+              </div>
+            `;
+          }
+        } catch (error) {
+          baselineResults.innerHTML = `
+            <div class="p-3 bg-red-50 text-red-800 rounded">
+              <p class="font-medium">❌ Network Error</p>
+              <p>${error.message}</p>
+            </div>
+          `;
+        } finally {
+          trainBaselineBtn.innerHTML = originalBtnContent;
+          trainBaselineBtn.disabled = false;
+        }
+      }
+
+      // Task indicators and UI updates
+      function updateTaskIndicators() {
+        const task1 = document.getElementById("task1-indicator");
+        const task2 = document.getElementById("task2-indicator");
+        const task3 = document.getElementById("task3-indicator");
+        
+        // Task 1: Baseline trained
+        if (baselineAccuracy !== null) {
+          task1.className = "w-12 h-12 rounded-full bg-green-500 mx-auto mb-2 flex items-center justify-center";
+          task1.innerHTML = '<i class="fas fa-check text-white"></i>';
+        }
+        
+        // Task 2: Active Learning started
+        if (currentSessionId !== "default" && baselineAccuracy !== null) {
+          task2.className = "w-12 h-12 rounded-full bg-purple-500 mx-auto mb-2 flex items-center justify-center";
+          task2.innerHTML = '<i class="fas fa-rocket text-white"></i>';
+        }
+        
+        // Task 3: Interactive labeling active
+        if (!document.getElementById("samples-panel").classList.contains("hidden")) {
+          task3.className = "w-12 h-12 rounded-full bg-blue-500 mx-auto mb-2 flex items-center justify-center";
+          task3.innerHTML = '<i class="fas fa-hand-pointer text-white"></i>';
+        }
+      }
+      
+      function updateBaselineDisplay() {
+        if (baselineAccuracy !== null) {
+          document.getElementById("target-accuracy").textContent = `${(baselineAccuracy * 100).toFixed(2)}%`;
+          document.getElementById("baseline-details").textContent = `Model: ${currentModelType.toUpperCase()} | Full Dataset`;
+          document.getElementById("baseline-performance").classList.remove("hidden");
+          document.getElementById("baseline-display").textContent = `${(baselineAccuracy * 100).toFixed(2)}%`;
+          
+          // Add baseline line to chart
+          const maxSamples = 500; // Adjust based on your dataset
+          chart.data.datasets[1].data = Array(maxSamples).fill(baselineAccuracy);
+          chart.data.labels = Array.from({length: maxSamples}, (_, i) => i * 10);
+          chart.update();
+        }
+      }
+      
+      function updateStoppingProgress() {
+        const progress = (queryCount / maxQueries) * 100;
+        document.getElementById("stopping-progress").textContent = `${queryCount} / ${maxQueries} queries`;
+        document.getElementById("stopping-progress-bar").style.width = `${Math.min(progress, 100)}%`;
+        
+        // Check stopping conditions
+        const currentAcc = getCurrentAccuracy();
+        if (queryCount >= maxQueries || (currentAcc && currentAcc >= targetAccuracy)) {
+          showStoppingMessage();
+        }
+      }
+      
+      function getCurrentAccuracy() {
+        const accuracyText = document.getElementById("current-al-display").textContent;
+        if (accuracyText === "--") return null;
+        return parseFloat(accuracyText.replace('%', '')) / 100;
+      }
+      
+      function showStoppingMessage() {
+        const currentAcc = getCurrentAccuracy();
+        let message = "Stopping condition reached! ";
+        
+        if (currentAcc >= targetAccuracy) {
+          message += `Target accuracy of ${(targetAccuracy * 100).toFixed(1)}% achieved with ${queryCount} queries.`;
+        } else if (queryCount >= maxQueries) {
+          message += `Maximum queries (${maxQueries}) reached. Final accuracy: ${(currentAcc * 100).toFixed(2)}%`;
+        }
+        
+        if (baselineAccuracy && currentAcc) {
+          const efficiency = (currentAcc / baselineAccuracy * 100).toFixed(1);
+          message += ` Efficiency: ${efficiency}% of baseline with ${queryCount} samples.`;
+        }
+        
+        showAlert(message, "info");
+      }
+
+      // Start Over - Reset entire session
+      function startOver() {
+        if (confirm("Are you sure you want to start over? This will reset all progress and clear the current session.")) {
+          // Reset global variables
+          currentSessionId = "session_" + Date.now(); // Generate new session ID
+          currentBatchSize = 5;
+          baselineAccuracy = null;
+          currentModelType = null;
+          queryCount = 0;
+          maxQueries = 110;
+          targetAccuracy = 0.85;
+          
+          // Reset UI elements
+          document.getElementById("baseline-model-type").selectedIndex = 0;
+          document.getElementById("al-strategy").selectedIndex = 0;
+          document.getElementById("batch-size").value = 5;
+          document.getElementById("initial-pool").value = 100;
+          document.getElementById("max-queries").value = 110;
+          document.getElementById("target-acc").value = 0.85;
+          
+          // Reset pretrained model section
+          document.getElementById("pretrained-model-type").selectedIndex = 0;
+          document.getElementById("pretrained-models-container").classList.add("hidden");
+          document.getElementById("load-pretrained-btn").disabled = true;
+          document.getElementById("pretrained-results").classList.add("hidden");
+          
+          // Hide results sections
+          document.getElementById("baseline-results").classList.add("hidden");
+          document.getElementById("baseline-performance").classList.add("hidden");
+          document.getElementById("al-performance").classList.add("hidden");
+          document.getElementById("comparison-display").classList.add("hidden");
+          document.getElementById("samples-panel").classList.add("hidden");
+          
+          // Reset buttons
+          document.getElementById("start-al").disabled = true;
+          document.getElementById("start-al").parentElement.querySelector('.text-xs').innerHTML = 
+            '<i class="fas fa-info-circle mr-1"></i> Complete Task 1 first to enable Active Learning';
+          
+          // Reset task indicators
+          const task1 = document.getElementById("task1-indicator");
+          const task2 = document.getElementById("task2-indicator");
+          const task3 = document.getElementById("task3-indicator");
+          
+          task1.className = "w-12 h-12 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center";
+          task1.innerHTML = '<span class="text-white font-bold">1</span>';
+          
+          task2.className = "w-12 h-12 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center";
+          task2.innerHTML = '<span class="text-white font-bold">2</span>';
+          
+          task3.className = "w-12 h-12 rounded-full bg-gray-300 mx-auto mb-2 flex items-center justify-center";
+          task3.innerHTML = '<span class="text-white font-bold">3</span>';
+          
+          // Reset displays
+          document.getElementById("target-accuracy").textContent = "--";
+          document.getElementById("baseline-details").textContent = "Model: -- | Full Dataset";
+          document.getElementById("current-accuracy").textContent = "--";
+          document.getElementById("al-details").textContent = "Strategy: -- | Samples: --";
+          document.getElementById("baseline-display").textContent = "--";
+          document.getElementById("current-al-display").textContent = "--";
+          document.getElementById("labeled-count").textContent = "0";
+          document.getElementById("current-strategy-display").textContent = "-";
+          document.getElementById("efficiency-score").textContent = "--";
+          
+          // Reset chart
+          chart.data.labels = [];
+          chart.data.datasets[0].data = [];
+          chart.data.datasets[1].data = [];
+          chart.update();
+          
+          // Reset progress bars
+          document.getElementById("stopping-progress").textContent = "0 / 110 queries";
+          document.getElementById("stopping-progress-bar").style.width = "0%";
+          document.getElementById("selection-progress").style.width = "0%";
+          document.getElementById("selected-count").textContent = "0";
+          document.getElementById("total-count").textContent = "5";
+          
+          // Clear samples container
+          document.getElementById("samples-container").innerHTML = "";
+          
+          showAlert("Session reset successfully! You can now start fresh.", "success");
+        }
+      }
 
       // Load available models when model type is selected
       async function loadModelOptions() {
@@ -462,14 +862,13 @@
             pretrainedResults.innerHTML = `<div class='text-red-500'>No pretrained models found for this type.</div>`;
           }
         } catch (error) {
-          console.error("Error fetching models:", error);
           showAlert(`Error loading models: ${error.message}`, "error");
           pretrainedModelsContainer.classList.add("hidden");
           loadPretrainedBtn.disabled = true;
         }
       }
 
-      // Load pretrained model
+      // Load pretrained model as baseline
       async function loadPretrainedModel() {
         const modelType = pretrainedModelType.value;
         const filename = pretrainedModelSelect.value;
@@ -477,111 +876,80 @@
         if (!modelType || !filename) return;
 
         const originalBtnContent = loadPretrainedBtn.innerHTML;
-        loadPretrainedBtn.innerHTML =
-          '<i class="fas fa-spinner loading-spinner mr-2"></i> Loading...';
+        loadPretrainedBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Loading...';
         loadPretrainedBtn.disabled = true;
         pretrainedResults.innerHTML = "";
         pretrainedResults.classList.remove("hidden");
 
         try {
-          const response = await fetch("/project2/load-pretrained/", {
-            method: "POST",
-            headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model_type: modelType,
-              filename: filename,
-            }),
-          });
+          // First, get the model accuracy from metadata
+          const metadataResponse = await fetch(`/project2/list-models/?model_type=${encodeURIComponent(modelType)}`);
+          const metadataData = await metadataResponse.json();
+          
+          let modelAccuracy = null;
+          if (metadataData.models) {
+            const modelInfo = metadataData.models.find(m => m.filename === filename);
+            if (modelInfo) {
+              modelAccuracy = modelInfo.accuracy;
+            }
+          }
 
-          const data = await response.json();
-          if (response.ok) {
-            showAlert("Model loaded successfully!", "success");
-            currentSessionId = data.session_id;
-            document.getElementById("samples-panel").classList.remove("hidden");
-            pretrainedBadge.classList.remove("hidden");
-            await updateProgress();
+          if (modelAccuracy) {
+            // Set as baseline without loading full model for AL
+            baselineAccuracy = modelAccuracy;
+            currentModelType = modelType;
+            
+            pretrainedResults.innerHTML = `
+              <div class="p-2 bg-green-50 text-green-800 rounded">
+                <p class="font-medium text-xs">✅ Baseline Loaded!</p>
+                <p class="text-xs"><strong>Model:</strong> ${modelType.toUpperCase()}</p>
+                <p class="text-xs"><strong>Target Accuracy:</strong> ${(modelAccuracy * 100).toFixed(2)}%</p>
+              </div>
+            `;
+            
+            // Update UI
+            updateTaskIndicators();
+            updateBaselineDisplay();
+            
+            // Enable Task 2
+            startAlBtn.disabled = false;
+            startAlBtn.parentElement.querySelector('.text-xs').innerHTML = 
+              '<i class="fas fa-check-circle mr-1 text-green-500"></i> Ready to start Active Learning';
+            
+            showAlert("Pretrained baseline loaded successfully! You can now start Active Learning.", "success");
           } else {
-            showAlert(data.error || "Failed to load model", "error");
+            pretrainedResults.innerHTML = `
+              <div class="p-2 bg-red-50 text-red-800 rounded">
+                <p class="font-medium text-xs">❌ Failed to load model accuracy</p>
+              </div>
+            `;
           }
         } catch (error) {
-          showAlert(error.message, "error");
+          pretrainedResults.innerHTML = `
+            <div class="p-2 bg-red-50 text-red-800 rounded">
+              <p class="font-medium text-xs">❌ Error: ${error.message}</p>
+            </div>
+          `;
         } finally {
           loadPretrainedBtn.innerHTML = originalBtnContent;
           loadPretrainedBtn.disabled = false;
         }
       }
 
-      // Train model function
-      async function trainModel() {
-        const modelType = document.getElementById("model-type").value;
-        const trainBtn = document.getElementById("train-btn");
-        const resultsDiv = document.getElementById("train-results");
-
-        // Save original button content
-        const originalBtnContent = trainBtn.innerHTML;
-
-        trainBtn.innerHTML =
-          '<i class="fas fa-spinner loading-spinner mr-2"></i> Training...';
-        trainBtn.disabled = true;
-        resultsDiv.innerHTML = "";
-        resultsDiv.classList.remove("hidden");
-
-        try {
-          const response = await fetch(`/project2/train/${modelType}/`, {
-            method: "POST",
-            headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-              "Content-Type": "application/json",
-            },
-          });
-
-          const data = await response.json();
-          if (response.ok) {
-            resultsDiv.innerHTML = `
-              <div class="p-3 bg-green-50 text-green-800 rounded">
-                <p class="font-medium">Training successful!</p>
-                <p>Model Type: ${modelType.toUpperCase()}</p>
-                <p>Accuracy: ${(data.accuracy * 100).toFixed(2)}%</p>
-                <p class="text-xs mt-2">Model saved as: ${data.filename}</p>
-              </div>
-            `;
-          } else {
-            resultsDiv.innerHTML = `
-              <div class="p-3 bg-red-50 text-red-800 rounded">
-                <p class="font-medium">Error occurred</p>
-                <p>${data.error || "Unknown error during training"}</p>
-              </div>
-            `;
-          }
-        } catch (error) {
-          resultsDiv.innerHTML = `
-            <div class="p-3 bg-red-50 text-red-800 rounded">
-              <p class="font-medium">Network Error</p>
-              <p>${error.message}</p>
-            </div>
-          `;
-        } finally {
-          trainBtn.innerHTML = originalBtnContent;
-          trainBtn.disabled = false;
-        }
-      }
-
-      // Start active learning session
+      // Task 2: Start active learning session
       async function startActiveLearning() {
-        const modelType = document.getElementById("model-type").value;
+        if (baselineAccuracy === null) {
+          showAlert("Please complete Task 1 (Baseline Training) first!", "warning");
+          return;
+        }
+
         const strategy = document.getElementById("al-strategy").value;
         const batchSize = document.getElementById("batch-size").value;
         const initialPool = document.getElementById("initial-pool").value;
         const startBtn = document.getElementById("start-al");
 
-        // Save original button content
         const originalBtnContent = startBtn.innerHTML;
-
-        startBtn.innerHTML =
-          '<i class="fas fa-spinner loading-spinner mr-2"></i> Starting...';
+        startBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Starting AL...';
         startBtn.disabled = true;
 
         try {
@@ -592,7 +960,7 @@
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model_type: modelType,
+              model_type: currentModelType,
               strategy: strategy,
               batch_size: batchSize,
               initial_size: initialPool,
@@ -602,23 +970,36 @@
 
           const data = await response.json();
           if (response.ok) {
-            // Show samples panel
+            // Reset query count and update session ID
+            queryCount = 0;
+            currentSessionId = data.session_id || currentSessionId;
+            
+            // Show Task 3 elements
             document.getElementById("samples-panel").classList.remove("hidden");
-            document.getElementById("current-strategy").textContent =
-              strategy.charAt(0).toUpperCase() + strategy.slice(1);
+            document.getElementById("current-strategy").textContent = strategy.charAt(0).toUpperCase() + strategy.slice(1);
             document.getElementById("total-count").textContent = batchSize;
-            pretrainedBadge.classList.add("hidden");
+            document.getElementById("al-performance").classList.remove("hidden");
+            document.getElementById("comparison-display").classList.remove("hidden");
+
+            // Update displays
+            updateTaskIndicators();
+            updateStoppingProgress();
 
             // Load first batch
             await getNextBatch();
-
-            // Update progress
             await updateProgress();
+
+            // Auto-scroll to samples panel for user convenience
+            setTimeout(() => {
+              document.getElementById("samples-panel").scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }, 500); // Small delay to ensure UI updates are complete
+
+            showAlert("Active Learning started! Begin labeling samples in Task 3.", "success");
           } else {
-            showAlert(
-              `Error: ${data.error || "Failed to start active learning"}`,
-              "error"
-            );
+            showAlert(`Error: ${data.error || "Failed to start active learning"}`, "error");
           }
         } catch (error) {
           showAlert(`Error: ${error.message}`, "error");
@@ -690,11 +1071,32 @@
               // Add event listeners to label buttons
               document.querySelectorAll(".label-btn").forEach((btn) => {
                 btn.addEventListener("click", function () {
-                  const checkbox = this.closest(".review-card").querySelector(
-                    'input[type="checkbox"]'
-                  );
+                  const reviewCard = this.closest(".review-card");
+                  const checkbox = reviewCard.querySelector('input[type="checkbox"]');
+                  const allButtons = reviewCard.querySelectorAll('.label-btn');
+                  
+                  // Remove active state from all buttons in this card
+                  allButtons.forEach(button => {
+                    button.classList.remove('active-label');
+                    if (button.dataset.label === '0') {
+                      button.className = 'label-btn bg-red-100 text-red-800 px-2 py-1 text-xs rounded hover:bg-red-200 transition-colors';
+                    } else {
+                      button.className = 'label-btn bg-green-100 text-green-800 px-2 py-1 text-xs rounded hover:bg-green-200 transition-colors';
+                    }
+                  });
+                  
+                  // Add active state to clicked button
+                  this.classList.add('active-label');
+                  if (this.dataset.label === '0') {
+                    this.className = 'label-btn active-label bg-red-600 text-white px-2 py-1 text-xs rounded shadow-md transform scale-105 transition-colors';
+                  } else {
+                    this.className = 'label-btn active-label bg-green-600 text-white px-2 py-1 text-xs rounded shadow-md transform scale-105 transition-colors';
+                  }
+                  
+                  // Set checkbox state
                   checkbox.checked = true;
                   checkbox.dataset.label = this.dataset.label;
+                  
                   updateSelectionCount();
                 });
               });
@@ -730,17 +1132,12 @@
 
       // Submit labels for current batch
       async function submitLabels() {
-        const checkboxes = document.querySelectorAll(
-          '#samples-container input[type="checkbox"]:checked'
-        );
+        const checkboxes = document.querySelectorAll('#samples-container input[type="checkbox"]:checked');
         const labels = {};
         const submitBtn = document.getElementById("submit-labels");
 
-        // Save original button content
         const originalBtnContent = submitBtn.innerHTML;
-
-        submitBtn.innerHTML =
-          '<i class="fas fa-spinner loading-spinner mr-2"></i> Processing...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Processing...';
         submitBtn.disabled = true;
 
         checkboxes.forEach((checkbox) => {
@@ -748,34 +1145,36 @@
         });
 
         try {
-          const response = await fetch(
-            "/project2/active-learning/submit-labels/",
-            {
-              method: "POST",
-              headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                session_id: currentSessionId,
-                labels: labels,
-              }),
-            }
-          );
+          const response = await fetch("/project2/active-learning/submit-labels/", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              session_id: currentSessionId,
+              labels: labels,
+            }),
+          });
 
           const data = await response.json();
           if (response.ok) {
-            showAlert(
-              `${Object.keys(labels).length} samples labeled successfully!`,
-              "success"
-            );
+            // Increment query count by batch size, not just labeled samples
+            queryCount += currentBatchSize;
+            
+            // Update diagnostic information if available
+            if (data.class_balance) {
+              document.getElementById("class-balance").textContent = data.class_balance;
+            }
+            if (data.training_size) {
+              document.getElementById("training-size").textContent = data.training_size;
+            }
+            
+            showAlert(`${Object.keys(labels).length} samples labeled successfully!`, "success");
             await getNextBatch();
             await updateProgress();
           } else {
-            showAlert(
-              `Error: ${data.error || "Failed to submit labels"}`,
-              "error"
-            );
+            showAlert(`Error: ${data.error || "Failed to submit labels"}`, "error");
           }
         } catch (error) {
           showAlert(`Error: ${error.message}`, "error");
@@ -787,21 +1186,20 @@
       // Skip current batch
       async function skipBatch() {
         try {
-          // Submit empty labels to skip the batch
-          const response = await fetch(
-            "/project2/active-learning/submit-labels/",
-            {
-              method: "POST",
-              headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                session_id: currentSessionId,
-                labels: {},
-              }),
-            }
-          );
+          // Increment query count even when skipping
+          queryCount += currentBatchSize;
+          
+          const response = await fetch("/project2/active-learning/submit-labels/", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              session_id: currentSessionId,
+              labels: {},
+            }),
+          });
 
           const data = await response.json();
           if (response.ok) {
@@ -809,10 +1207,7 @@
             await getNextBatch();
             await updateProgress();
           } else {
-            showAlert(
-              `Error: ${data.error || "Failed to skip batch"}`,
-              "error"
-            );
+            showAlert(`Error: ${data.error || "Failed to skip batch"}`, "error");
           }
         } catch (error) {
           showAlert(`Error: ${error.message}`, "error");
@@ -829,11 +1224,45 @@
           (checkbox) => checkbox.checked
         );
 
-        checkboxes.forEach((checkbox) => {
-          checkbox.checked = !allChecked;
-          // Set a default label if not already set
-          if (!checkbox.dataset.label) {
+        checkboxes.forEach((checkbox, index) => {
+          const reviewCard = checkbox.closest('.review-card');
+          const allButtons = reviewCard.querySelectorAll('.label-btn');
+          
+          if (!allChecked) {
+            // Select all - check checkbox and set default positive label
+            checkbox.checked = true;
             checkbox.dataset.label = "1"; // Default to positive
+            
+            // Reset all buttons first
+            allButtons.forEach(button => {
+              button.classList.remove('active-label');
+              if (button.dataset.label === '0') {
+                button.className = 'label-btn bg-red-100 text-red-800 px-2 py-1 text-xs rounded hover:bg-red-200 transition-colors';
+              } else {
+                button.className = 'label-btn bg-green-100 text-green-800 px-2 py-1 text-xs rounded hover:bg-green-200 transition-colors';
+              }
+            });
+            
+            // Activate positive button by default
+            const positiveBtn = reviewCard.querySelector('.label-btn[data-label="1"]');
+            if (positiveBtn) {
+              positiveBtn.classList.add('active-label');
+              positiveBtn.className = 'label-btn active-label bg-green-600 text-white px-2 py-1 text-xs rounded shadow-md transform scale-105 transition-colors';
+            }
+          } else {
+            // Deselect all
+            checkbox.checked = false;
+            checkbox.dataset.label = '';
+            
+            // Reset all buttons
+            allButtons.forEach(button => {
+              button.classList.remove('active-label');
+              if (button.dataset.label === '0') {
+                button.className = 'label-btn bg-red-100 text-red-800 px-2 py-1 text-xs rounded hover:bg-red-200 transition-colors';
+              } else {
+                button.className = 'label-btn bg-green-100 text-green-800 px-2 py-1 text-xs rounded hover:bg-green-200 transition-colors';
+              }
+            });
           }
         });
 
@@ -859,31 +1288,57 @@
         document.getElementById("submit-labels").disabled = selectedCount === 0;
       }
 
-      // Update progress display
+      // Update progress display with smoothing option
       async function updateProgress() {
         try {
           const response = await fetch(
-            `/project2/active-learning/progress/?session_id=${currentSessionId}`
+            `/project2/active-learning/progress/?session_id=${encodeURIComponent(currentSessionId)}`
           );
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
           const data = await response.json();
 
-          if (response.ok) {
-            document.getElementById("labeled-count").textContent =
-              data.samples_labeled;
-            document.getElementById("accuracy").textContent = `${(
-              data.history.accuracy.slice(-1)[0] * 100
-            ).toFixed(2)}%`;
-            currentModelTypeDisplay.textContent = data.model_type.toUpperCase();
-            currentStrategyDisplay.textContent =
+          if (response.ok && data.history && data.history.accuracy && data.history.accuracy.length > 0) {
+            const currentAcc = data.history.accuracy.slice(-1)[0];
+            
+            // Calculate moving average for smoother display
+            const windowSize = Math.min(3, data.history.accuracy.length);
+            const recentAcc = data.history.accuracy.slice(-windowSize);
+            const smoothedAcc = recentAcc.reduce((a, b) => a + b, 0) / recentAcc.length;
+            
+            // Update displays
+            document.getElementById("labeled-count").textContent = data.samples_labeled;
+            document.getElementById("current-al-display").textContent = `${(currentAcc * 100).toFixed(2)}%`;
+            document.getElementById("current-accuracy").textContent = `${(currentAcc * 100).toFixed(2)}%`;
+            document.getElementById("al-details").textContent = 
+              `Strategy: ${data.strategy} | Samples: ${data.samples_labeled}`;
+            document.getElementById("current-strategy-display").textContent =
               data.strategy.charAt(0).toUpperCase() + data.strategy.slice(1);
 
-            // Update chart
+            // Update comparison
+            if (baselineAccuracy) {
+              const efficiency = ((smoothedAcc / baselineAccuracy) * 100).toFixed(1);
+              const sampleEfficiency = ((data.samples_labeled / 40000) * 100).toFixed(2); // Assuming 40k total samples
+              document.getElementById("efficiency-score").textContent = 
+                `${efficiency}% accuracy with ${sampleEfficiency}% of data`;
+            }
+
+            // Update chart (only active learning line)
             chart.data.labels = data.history.samples;
             chart.data.datasets[0].data = data.history.accuracy;
             chart.update();
+            
+            // Update query count and check stopping conditions
+            queryCount = data.samples_labeled;
+            updateStoppingProgress();
+          } else {
+            // No valid accuracy data in response
           }
         } catch (error) {
-          console.error("Error updating progress:", error);
+          showAlert(`Failed to update progress: ${error.message}`, "error");
         }
       }
 

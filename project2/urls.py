@@ -10,6 +10,7 @@ urlpatterns = [
     
     # Model Training
     path('train/<str:model_type>/', views.train_model, name='train_model'),
+    path('train-baseline/<str:model_type>/', views.train_baseline_model, name='train_baseline_model'),
     path('load-pretrained/', views.load_pretrained_model, name='load_pretrained'),
     path('list-models/', views.list_models_api, name='list_models'),
     # Active Learning Endpoints
