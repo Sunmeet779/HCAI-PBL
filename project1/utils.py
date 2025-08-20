@@ -51,17 +51,17 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
         metric_func = accuracy_score
     elif metric == 'f1':
         if n_classes == 2:
-            metric_func = lambda y_true, y_pred: f1_score(y_true, y_pred, average='binary')
+            metric_func = lambda y_true, y_pred: f1_score(y_true, y_pred, zero_division=0)
         else:
-            metric_func = lambda y_true, y_pred: f1_score(y_true, y_pred, average='weighted')
+            metric_func = lambda y_true, y_pred: f1_score(y_true, y_pred, average='weighted', zero_division=0)
     elif metric == 'precision':
         if n_classes == 2:
-            metric_func = lambda y_true, y_pred: precision_score(y_true, y_pred, average='binary', zero_division=0)
+            metric_func = lambda y_true, y_pred: precision_score(y_true, y_pred, zero_division=0)
         else:
             metric_func = lambda y_true, y_pred: precision_score(y_true, y_pred, average='weighted', zero_division=0)
     elif metric == 'recall':
         if n_classes == 2:
-            metric_func = lambda y_true, y_pred: recall_score(y_true, y_pred, average='binary', zero_division=0)
+            metric_func = lambda y_true, y_pred: recall_score(y_true, y_pred, zero_division=0)
         else:
             metric_func = lambda y_true, y_pred: recall_score(y_true, y_pred, average='weighted', zero_division=0)
     else:
@@ -73,6 +73,7 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
             model = LogisticRegression(C=c, max_iter=1000, random_state=42)
             model.fit(X_train, y_train)
             preds = model.predict(X_test)
+            
             score = metric_func(y_test, preds)
             
             if score > best_score:
@@ -83,11 +84,24 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
     elif model_name == 'rf':
         n_list = n_estimators_values if n_estimators_values else [100]
         depth_list = max_depth_values if max_depth_values else [None]
+        
+        # Ensure max_depth values are properly converted to int or None
+        processed_depth_list = []
+        for d in depth_list:
+            if d is None or str(d).lower() == 'none':
+                processed_depth_list.append(None)
+            else:
+                try:
+                    processed_depth_list.append(int(float(d)))
+                except (ValueError, TypeError):
+                    processed_depth_list.append(None)
+        
         for n in n_list:
-            for d in depth_list:
+            for d in processed_depth_list:
                 model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
                 model.fit(X_train, y_train)
                 preds = model.predict(X_test)
+                
                 score = metric_func(y_test, preds)
                 
                 if score > best_score:
@@ -101,6 +115,7 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
             model = SVC(C=c, random_state=42)
             model.fit(X_train, y_train)
             preds = model.predict(X_test)
+            
             score = metric_func(y_test, preds)
             
             if score > best_score:
