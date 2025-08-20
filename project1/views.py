@@ -22,10 +22,20 @@ def index(request):
                 request.session['csv_data'] = df.to_json()
                 columns = df.columns.tolist()
 
+                # Create dataset preview
+                df_preview = df.head().to_html(classes='data-table', table_id='dataset-preview', escape=False)
+                df_shape = df.shape
+                df_size = df.size
+                memory_usage = f"{df.memory_usage(deep=True).sum() / 1024:.1f} KB"
+
                 target_form = TargetSelectForm(column_choices=columns)
                 return render(request, 'upload_train.html', {
                     'step': 2,
-                    'target_form': target_form
+                    'target_form': target_form,
+                    'df_preview': df_preview,
+                    'df_shape': df_shape,
+                    'df_size': df_size,
+                    'memory_usage': memory_usage
                 })
             else:
                 messages.error(request, "Please upload a valid CSV file.")
@@ -118,6 +128,11 @@ def index(request):
                     'model_form': model_form,
                     'target_column': target_column
                 })
+        
+        # If we reach here, it's an unexpected POST request
+        else:
+            messages.error(request, "Invalid request. Please start over.")
+            return redirect('project1:index')
 
     else:
         upload_form = CSVUploadForm()
