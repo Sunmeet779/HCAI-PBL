@@ -45,14 +45,19 @@ def index(request):
         elif 'select_target' in request.POST:
             csv_json = request.session.get('csv_data')
             if not csv_json:
-                messages.error(request, "Session expired. Please upload the CSV file again.")
+                messages.error(request, "No CSV data found. Please upload a file.")
                 return redirect('project1:index')
 
             df = pd.read_json(csv_json)
-            target_form = TargetSelectForm(column_choices=df.columns.tolist(), data=request.POST)
+            columns = df.columns.tolist()
+            
+            target_form = TargetSelectForm(columns, request.POST)
             if target_form.is_valid():
                 target_column = target_form.cleaned_data['target_column']
                 request.session['target_column'] = target_column
+
+                df_processed, feature_cols = utils.preprocess_dataframe(df, target_column)
+                request.session['feature_cols'] = feature_cols
 
                 model_form = ModelSelectForm()
                 return render(request, 'upload_train.html', {
@@ -87,10 +92,16 @@ def index(request):
                         return [float(x.strip()) for x in s.split(',') if x.strip()]
                     except:
                         return None
+                
+                def parse_ints(s):
+                    try:
+                        return [int(float(x.strip())) for x in s.split(',') if x.strip()]
+                    except:
+                        return None
 
                 c_values = parse_floats(model_form.cleaned_data['c_values']) if model_name in ['logreg', 'svm'] else None
-                n_estimators_values = parse_floats(model_form.cleaned_data['n_estimators_values']) if model_name == 'rf' else None
-                max_depth_values = parse_floats(model_form.cleaned_data['max_depth_values']) if model_name == 'rf' else None
+                n_estimators_values = parse_ints(model_form.cleaned_data['n_estimators_values']) if model_name == 'rf' else None
+                max_depth_values = parse_ints(model_form.cleaned_data['max_depth_values']) if model_name == 'rf' else None
 
                 try:
                     df_processed, feature_cols = utils.preprocess_dataframe(df, target_column)
