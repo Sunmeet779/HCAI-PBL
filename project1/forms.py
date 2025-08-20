@@ -44,22 +44,26 @@ class ModelSelectForm(forms.Form):
     c_values = forms.CharField(
         label="C values (comma-separated)",
         required=False,
+        initial="1",
         help_text="For Logistic Regression or SVM (e.g., 0.01,0.1,1,10)"
     )
 
     n_estimators_values = forms.CharField(
         label="n_estimators (comma-separated)",
         required=False,
+        initial="100",
         help_text="For Random Forest (e.g., 10,50,100)"
     )
 
     max_depth_values = forms.CharField(
         label="max_depth (comma-separated)",
         required=False,
+        initial="10",
         help_text="For Random Forest (e.g., 3,5,10)"
     )
 
     metric = forms.ChoiceField(
         choices=METRIC_CHOICES,
+        initial='f1',
         label="Evaluation Metric"
     )

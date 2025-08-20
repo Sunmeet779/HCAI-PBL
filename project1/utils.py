@@ -42,16 +42,39 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
     best_score = -1
     best_params = {}
     best_model = None
-
-    metric_func = accuracy_score if metric == 'accuracy' else f1_score
+    
+    # Determine number of unique classes for metric calculation
+    n_classes = len(np.unique(y))
+    
+    # Define metric function based on the selected metric and number of classes
+    if metric == 'accuracy':
+        metric_func = accuracy_score
+    elif metric == 'f1':
+        if n_classes == 2:
+            metric_func = lambda y_true, y_pred: f1_score(y_true, y_pred, average='binary')
+        else:
+            metric_func = lambda y_true, y_pred: f1_score(y_true, y_pred, average='weighted')
+    elif metric == 'precision':
+        if n_classes == 2:
+            metric_func = lambda y_true, y_pred: precision_score(y_true, y_pred, average='binary', zero_division=0)
+        else:
+            metric_func = lambda y_true, y_pred: precision_score(y_true, y_pred, average='weighted', zero_division=0)
+    elif metric == 'recall':
+        if n_classes == 2:
+            metric_func = lambda y_true, y_pred: recall_score(y_true, y_pred, average='binary', zero_division=0)
+        else:
+            metric_func = lambda y_true, y_pred: recall_score(y_true, y_pred, average='weighted', zero_division=0)
+    else:
+        raise ValueError(f"Unsupported metric: {metric}")
 
     if model_name == 'logreg':
         c_list = c_values if c_values else [1.0]
         for c in c_list:
-            model = LogisticRegression(C=c, max_iter=200)
+            model = LogisticRegression(C=c, max_iter=1000, random_state=42)
             model.fit(X_train, y_train)
             preds = model.predict(X_test)
             score = metric_func(y_test, preds)
+            
             if score > best_score:
                 best_score = score
                 best_params = {'C': c}
@@ -62,10 +85,11 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
         depth_list = max_depth_values if max_depth_values else [None]
         for n in n_list:
             for d in depth_list:
-                model = RandomForestClassifier(n_estimators=n, max_depth=d)
+                model = RandomForestClassifier(n_estimators=n, max_depth=d, random_state=42)
                 model.fit(X_train, y_train)
                 preds = model.predict(X_test)
                 score = metric_func(y_test, preds)
+                
                 if score > best_score:
                     best_score = score
                     best_params = {'n_estimators': n, 'max_depth': d}
@@ -74,10 +98,11 @@ def train_and_evaluate(df, feature_cols, target_col, model_name, test_size, metr
     elif model_name == 'svm':
         c_list = c_values if c_values else [1.0]
         for c in c_list:
-            model = SVC(C=c)
+            model = SVC(C=c, random_state=42)
             model.fit(X_train, y_train)
             preds = model.predict(X_test)
             score = metric_func(y_test, preds)
+            
             if score > best_score:
                 best_score = score
                 best_params = {'C': c}
