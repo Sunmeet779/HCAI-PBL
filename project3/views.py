@@ -232,8 +232,6 @@ def counterfactual_explanations(request):
         X_scaled_continuous,   # continuous features
         X[['sex']].values      # sex last
     ])
-    # print("X_scaled shape:", X_scaled.shape)  # Debugging
-    # print("X.columns:", X.columns.tolist())   # Debugging
 
     # Fit classifier
     clf = LogisticRegression(max_iter=1000)
@@ -257,12 +255,10 @@ def counterfactual_explanations(request):
             x_original[-1:]   # sex
         ])
     ))
-    # print("Original features:", original_features)  # Debugging
 
     # Calculate MAD for continuous features only
     mad_continuous = median_abs_deviation(X_scaled[:, 1:1+len(continuous_cols)], axis=0)
     mad = np.hstack([np.ones(1), mad_continuous, np.ones(1)])  # island, continuous, sex
-    # print("MAD values:", mad)  # Debugging
 
     # Generate counterfactuals
     counterfactuals = []

@@ -35,7 +35,13 @@ def train_model(request, model_type):
         return JsonResponse({'error': 'POST method required'}, status=400)
     
     try:
-        X, y = load_imdb_dataset()
+        # Load dataset - use optimized loading for LDA
+        if model_type == 'lda':
+            from .utils import LDA_SAMPLE_SIZE
+            X, y = load_imdb_dataset(sample_size=LDA_SAMPLE_SIZE)
+        else:
+            X, y = load_imdb_dataset()
+            
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         vectorizer, X_vec = initialize_vectorizer(model_type, X_train)
@@ -78,8 +84,14 @@ def train_baseline_model(request, model_type):
         return JsonResponse({'error': 'POST method required'}, status=400)
     
     try:
-        # Load full dataset
-        X, y = load_imdb_dataset()
+        # Load dataset - use smaller sample for LDA to speed up training
+        if model_type == 'lda':
+            # Import the LDA_SAMPLE_SIZE setting
+            from .utils import LDA_SAMPLE_SIZE
+            X, y = load_imdb_dataset(sample_size=LDA_SAMPLE_SIZE)
+        else:
+            X, y = load_imdb_dataset()  # Use full dataset for other models
+            
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         # Initialize vectorizer and transform data
@@ -141,12 +153,21 @@ def load_pretrained_model(request):
             
         model = load_model(filename)
         
-        # Load vectorizer
+        # Load vectorizer - handle both regular and baseline models
         if model_type in ['tfidf', 'bow', 'lda']:
-            vec_filename = f"{model_type}_vectorizer_{filename.split('_')[-1]}"
+            # Check if this is a baseline model filename
+            if filename.startswith('baseline_'):
+                # For baseline models, the vectorizer has baseline_ prefix too
+                vec_filename = f"baseline_{model_type}_vectorizer_{filename.split('_')[-1]}"
+            else:
+                # For regular models
+                vec_filename = f"{model_type}_vectorizer_{filename.split('_')[-1]}"
             vectorizer = load_model(vec_filename)
         elif model_type == 'word2vec':
-            vec_filename = f"word2vec_model_{filename.split('_')[-1].replace('.pkl', '.bin')}"
+            if filename.startswith('baseline_'):
+                vec_filename = f"baseline_word2vec_model_{filename.split('_')[-1].replace('.pkl', '.bin')}"
+            else:
+                vec_filename = f"word2vec_model_{filename.split('_')[-1].replace('.pkl', '.bin')}"
             vectorizer = Word2Vec.load(os.path.join(MODEL_DIR, vec_filename))
         else:
             return JsonResponse({'error': 'Invalid model type'}, status=400)
@@ -154,7 +175,13 @@ def load_pretrained_model(request):
         # Create new active learning session
         session_id = f"pretrained_{int(time.time())}"
         
-        X, y = load_imdb_dataset()
+        # Load dataset - use optimized loading for LDA
+        if model_type == 'lda':
+            from .utils import LDA_SAMPLE_SIZE
+            X, y = load_imdb_dataset(sample_size=LDA_SAMPLE_SIZE)
+        else:
+            X, y = load_imdb_dataset()
+            
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         # Transform all training data
@@ -204,7 +231,13 @@ def list_models_api(request):
     metadata = load_metadata()
     
     if model_type:
+        # First try to get regular models
         models = metadata.get(model_type, [])
+        
+        # If no regular models found, try baseline models
+        if not models:
+            baseline_key = f"baseline_{model_type}"
+            models = metadata.get(baseline_key, [])
     else:
         models = []
         for mt in metadata:
@@ -234,7 +267,13 @@ def start_active_learning(request):
         batch_size = int(params.get('batch_size', 5))
         initial_size = int(params.get('initial_size', 100))
         
-        X, y = load_imdb_dataset()
+        # Load dataset - use optimized loading for LDA
+        if model_type == 'lda':
+            from .utils import LDA_SAMPLE_SIZE
+            X, y = load_imdb_dataset(sample_size=LDA_SAMPLE_SIZE)
+        else:
+            X, y = load_imdb_dataset()
+            
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         # Initialize vectorizer

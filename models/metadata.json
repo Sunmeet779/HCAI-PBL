@@ -1,70 +1,40 @@
 {
-    "tfidf": [
-        {
-            "filename": "tfidf_0.9030_20250620_113044.pkl",
-            "accuracy": 0.903,
-            "date": "2025-06-20 11:30:44"
-        },
-        {
-            "filename": "tfidf_0.9030_20250620_113044.pkl",
-            "accuracy": 0.903,
-            "date": "2025-06-20 11:30:44"
-        },
-        {
-            "filename": "tfidf_0.9030_20250820_114916.pkl",
-            "accuracy": 0.903,
-            "date": "2025-08-20 11:49:16"
-        },
-        {
-            "filename": "tfidf_0.9030_20250820_114916.pkl",
-            "accuracy": 0.903,
-            "date": "2025-08-20 11:49:16"
-        }
-    ],
-    "bow": [
-        {
-            "filename": "bow_0.8743_20250820_103548.pkl",
-            "accuracy": 0.8743,
-            "date": "2025-08-20 10:35:48"
-        },
-        {
-            "filename": "bow_0.8743_20250820_103548.pkl",
-            "accuracy": 0.8743,
-            "date": "2025-08-20 10:35:48"
-        }
-    ],
-    "word2vec": [
-        {
-            "filename": "word2vec_0.8372_20250820_110347.pkl",
-            "accuracy": 0.8372,
-            "date": "2025-08-20 11:03:47"
-        },
-        {
-            "filename": "word2vec_0.8372_20250820_110347.pkl",
-            "accuracy": 0.8372,
-            "date": "2025-08-20 11:03:47"
-        },
-        {
-            "filename": "word2vec_0.8332_20250820_110931.pkl",
-            "accuracy": 0.8332,
-            "date": "2025-08-20 11:09:31"
-        },
-        {
-            "filename": "word2vec_0.8332_20250820_110931.pkl",
-            "accuracy": 0.8332,
-            "date": "2025-08-20 11:09:31"
-        }
-    ],
     "baseline_tfidf": [
         {
-            "filename": "baseline_tfidf_0.9030_1755693621.pkl",
+            "filename": "baseline_tfidf_0.9030_1755711610.pkl",
             "accuracy": 0.903,
-            "date": "2025-08-20 12:40:21"
+            "date": "2025-08-20 17:40:10"
+        }
+    ],
+    "baseline_bow": [
+        {
+            "filename": "baseline_bow_0.8743_1755711647.pkl",
+            "accuracy": 0.8743,
+            "date": "2025-08-20 17:40:47"
         },
         {
-            "filename": "baseline_tfidf_0.9030_1755694015.pkl",
-            "accuracy": 0.903,
-            "date": "2025-08-20 12:46:55"
+            "filename": "baseline_bow_0.8743_1755712540.pkl",
+            "accuracy": 0.8743,
+            "date": "2025-08-20 17:55:40"
+        }
+    ],
+    "baseline_word2vec": [
+        {
+            "filename": "baseline_word2vec_0.8338_1755711702.pkl",
+            "accuracy": 0.8338,
+            "date": "2025-08-20 17:41:43"
+        }
+    ],
+    "baseline_lda": [
+        {
+            "filename": "baseline_lda_0.7765_1755711716.pkl",
+            "accuracy": 0.7765,
+            "date": "2025-08-20 17:41:56"
+        },
+        {
+            "filename": "baseline_lda_0.7765_1755712332.pkl",
+            "accuracy": 0.7765,
+            "date": "2025-08-20 17:52:12"
         }
     ]
 }

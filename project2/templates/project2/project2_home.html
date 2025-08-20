@@ -118,7 +118,7 @@
         <div class="flex justify-between items-center h-16">
           <!-- Left side - Back to Projects -->
           <div class="flex items-center">
-            <a href="/projects/" class="nav-link flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+            <a href="/" class="nav-link flex items-center text-gray-600 hover:text-blue-600 transition-colors">
               <i class="fas fa-arrow-left mr-2"></i>
               <span class="font-medium">Back to Projects</span>
             </a>
@@ -848,8 +848,11 @@
             // Populate the model select dropdown
             pretrainedModelSelect.innerHTML = data.models
               .map(
-                (model) =>
-                  `<option value="${model.filename}">${model.filename} (Acc: ${model.accuracy?.toFixed(4) ?? 'N/A'})</option>`
+                (model) => {
+                  const isBaseline = model.filename.startsWith('baseline_');
+                  const label = isBaseline ? `${model.filename} (Baseline - Acc: ${model.accuracy?.toFixed(4) ?? 'N/A'})` : `${model.filename} (Acc: ${model.accuracy?.toFixed(4) ?? 'N/A'})`;
+                  return `<option value="${model.filename}">${label}</option>`;
+                }
               )
               .join("");
             pretrainedModelsContainer.classList.remove("hidden");
@@ -859,7 +862,7 @@
             pretrainedModelsContainer.classList.add("hidden");
             loadPretrainedBtn.disabled = true;
             pretrainedResults.classList.remove("hidden");
-            pretrainedResults.innerHTML = `<div class='text-red-500'>No pretrained models found for this type.</div>`;
+            pretrainedResults.innerHTML = `<div class='text-red-500'>No pretrained models found for this type. Try training a baseline model first!</div>`;
           }
         } catch (error) {
           showAlert(`Error loading models: ${error.message}`, "error");

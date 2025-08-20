@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Add any interactive functionality if needed
-    console.log("Project 5 JS loaded");
     
     // Example: Highlight grid cells on hover
     const gridCells = document.querySelectorAll('.grid-cell');
