@@ -677,9 +677,12 @@
           task1.innerHTML = '<i class="fas fa-check text-white"></i>';
         }
         
-        // Task 2: Active Learning started
-        if (currentSessionId !== "default" && baselineAccuracy !== null) {
-          task2.className = "w-12 h-12 rounded-full bg-purple-500 mx-auto mb-2 flex items-center justify-center";
+        // Task 2: Active Learning ready/started - improved condition
+        const isTask2Ready = (baselineAccuracy !== null && currentModelType !== null) || // Baseline trained or loaded
+                             (currentSessionId !== "default" && baselineAccuracy !== null) || // AL session active
+                             !document.getElementById("samples-panel").classList.contains("hidden"); // AL samples visible
+        if (isTask2Ready) {
+          task2.className = "w-12 h-12 rounded-full bg-yellow-500 mx-auto mb-2 flex items-center justify-center";
           task2.innerHTML = '<i class="fas fa-rocket text-white"></i>';
         }
         
