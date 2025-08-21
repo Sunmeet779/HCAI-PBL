@@ -36,8 +36,6 @@ urlpatterns = [
     path('project3/', include('project3.urls')),
     path("project4/", include("project4.urls")),
     path("project5/", include("project5.urls")),
-    url(r'^media/(?P<path>.*)$', serve,{'document_root':       settings.MEDIA_ROOT}), 
-    url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
