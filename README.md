@@ -23,7 +23,7 @@ The project is structured as a collection of five Django applications, each focu
 
 ## 📂 Project Structure
 
-### 🏠 **home/** — Central Navigation
+### 🏠 **Home** — Central Navigation
 
 **Purpose:** Provides a landing page for navigating the project's applications.
 
@@ -33,7 +33,7 @@ The project is structured as a collection of five Django applications, each focu
 
 **Outcome:** A professional, responsive hub that ensures seamless access to all project components.
 
-### 📊 **project1/** — Data Visualization and Machine Learning
+### 📊 **Project 1** — Data Visualization and Machine Learning
 
 **Purpose:** Facilitates the upload, visualization, and training of supervised machine learning models using user-provided CSV datasets.
 
@@ -45,7 +45,7 @@ The project is structured as a collection of five Django applications, each focu
 
 **Outcome:** Enables end-to-end machine learning workflows with interactive data visualization and real-time predictions.
 
-### 📝 **project2/** — Active Learning for Text Classification
+### 📝 **Project 2** — Active Learning for Text Classification
 
 **Purpose:** Applies active learning to train sentiment classifiers on the IMDB 50k movie review dataset, optimizing sample selection for efficiency.
 
@@ -56,7 +56,7 @@ The project is structured as a collection of five Django applications, each focu
 
 **Outcome:** Demonstrates high-accuracy sentiment classification with minimal labeled data, enhancing efficiency in data annotation.
 
-### 🔍 **project3/** — Interactive Explainable AI
+### 🔍 **Project 3** — Interactive Explainable AI
 
 **Purpose:** Explores model interpretability using the Palmer Penguins dataset, with visualizations for decision trees, logistic regression, and counterfactual analysis.
 
@@ -66,7 +66,7 @@ The project is structured as a collection of five Django applications, each focu
 
 **Outcome:** Provides insights into model decision-making processes, supporting transparency and trust in AI systems.
 
-### 🎬 **project4/** — Cold-Start Movie Recommender
+### 🎬 **Project 4** — Cold-Start Movie Recommender
 
 **Purpose:** Implements a recommender system addressing the cold-start problem using the MovieLens dataset, with PDF export functionality.
 
@@ -79,7 +79,7 @@ The project is structured as a collection of five Django applications, each focu
 
 **Outcome:** Delivers personalized movie recommendations with an intuitive interface and exportable reports.
 
-### 🎮 **project5/** — Reinforcement Learning with Human Feedback
+### 🎮 **Project 5** — Reinforcement Learning with Human Feedback
 
 **Purpose:** Demonstrates reinforcement learning with human feedback (RLHF) using the REINFORCE algorithm to train a cheese-seeking mouse agent.
 
