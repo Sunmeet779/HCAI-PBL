@@ -1,4 +1,4 @@
-# Human-Centered AI — Project-Based Learning (HCAI-PBL)
+# Human-Centeric AI — Project-Based Learning (HCAI-PBL)
 
 A Django-based web application demonstrating various human-centric AI techniques and methodologies through interactive implementations.
 
