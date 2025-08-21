@@ -7,13 +7,13 @@ django-bootstrap5==25.1
 fontawesome-free==5.15.4
 fonttools==4.58.0
 fpdf==1.7.2
-gensim ==4.3.3
+gensim==4.3.3
 gosdt==1.0.4
 graphviz==0.21
 joblib==1.5.0
 kiwisolver==1.4.8
 matplotlib==3.10.3
-numpy ==1.26.4
+numpy==1.26.4
 packaging==25.0
 palmerpenguins==0.1.4
 pandas==2.2.3
@@ -23,10 +23,10 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 reportlab==4.4.2
 scikit-learn==1.6.1
-scipy ==1.13.1
+scipy==1.13.1
 seaborn==0.13.2
 six==1.17.0
-smart-open ==5.2.1
+smart-open==5.2.1
 sqlparse==0.5.3
 threadpoolctl==3.6.0
 typing_extensions==4.13.2
