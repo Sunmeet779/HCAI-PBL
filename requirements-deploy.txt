@@ -9,9 +9,8 @@ sqlparse==0.5.3
 pytz==2025.2
 tzdata==2025.2
 typing_extensions==4.13.2
-
-# Data science packages - using versions with reliable pre-built wheels
-numpy==1.24.3
+numpy>=1.27
+torch>=2.8.0
 pandas==2.0.3
 matplotlib==3.7.2
 seaborn==0.12.2
@@ -20,7 +19,6 @@ scipy==1.11.1
 pillow==10.0.0
 joblib==1.3.1
 
-# Other compatible packages
 reportlab==4.0.4
 pyparsing==3.1.1
 python-dateutil==2.8.2
@@ -32,13 +30,8 @@ cycler==0.11.0
 contourpy==1.1.0
 fpdf==1.7.2
 
-# Essential packages for project functionality
-torch==1.13.1  # Using older version with better wheel support
 gensim==4.3.0
 gosdt==1.0.4
 graphviz==0.20.1
 palmerpenguins==0.1.4
 smart-open==6.4.0
-
-# Note: If these still cause issues, consider using Cloud Run instead of App Engine
-# Cloud Run has better support for large ML packages
