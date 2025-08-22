@@ -1,7 +1,6 @@
-# GCP-compatible requirements with pre-built wheels
-asgiref==3.8.1
-charset-normalizer==3.4.2
+# Core Django and utilities
 Django==5.2.1
+asgiref==3.8.1
 django-bootstrap5==25.1
 gunicorn==23.0.0
 whitenoise==6.9.0
@@ -9,18 +8,24 @@ sqlparse==0.5.3
 pytz==2025.2
 tzdata==2025.2
 typing_extensions==4.13.2
-numpy>=1.27
-torch>=2.8.0
+
+# Scientific / ML stack
+numpy>=1.27,<1.28
 pandas==2.0.3
 matplotlib==3.7.2
 seaborn==0.12.2
 scikit-learn==1.3.0
 scipy==1.11.1
-pillow==10.0.0
+torch>=2.8.0
 joblib==1.3.1
+pillow==10.0.0
 
+# PDF / plotting
 reportlab==4.0.4
-pyparsing
+fpdf==1.7.2
+
+# Parsing / utilities
+pyparsing>=3.0
 python-dateutil==2.8.2
 six==1.16.0
 packaging==23.1
@@ -28,8 +33,8 @@ fonttools==4.42.1
 kiwisolver==1.4.4
 cycler==0.11.0
 contourpy==1.1.0
-fpdf==1.7.2
 
+# NLP / domain-specific
 gensim==4.3.0
 gosdt==1.0.4
 graphviz==0.20.1
