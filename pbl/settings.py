@@ -23,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ulscw9yso6q+hyj(2s-3ubvd9=krd-4p!axal6962&_meb9w&o"
+SECRET_KEY = os.environ.get('SECRET_KEY', "django-insecure-ulscw9yso6q+hyj(2s-3ubvd9=krd-4p!axal6962&_meb9w&o")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ["*"]
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -83,16 +84,27 @@ WSGI_APPLICATION = "pbl.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': '/cloudsql/hcaiproject:europe-west1:sqlcloud',  # connection name
-        'PORT': '3306',
-        'NAME': 'hcai_db',        # database name you created
-        'USER': 'hcai_admin',     # Cloud SQL user
-        'PASSWORD': 'SanikaSunmeet11',  # the password you set
+# Database configuration - supports both local SQLite and Google Cloud SQL
+if os.environ.get('USE_CLOUD_SQL') == 'true':
+    # Google Cloud SQL configuration (for production)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '/cloudsql/hcaiproject:europe-west1:sqlcloud',  # connection name
+            'PORT': '3306',
+            'NAME': 'hcai_db',        # database name you created
+            'USER': 'hcai_admin',     # Cloud SQL user
+            'PASSWORD': 'SanikaSunmeet11',  # the password you set
+        }
     }
-}
+else:
+    # SQLite configuration (for local development and PythonAnywhere)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 
@@ -136,8 +148,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-DEBUG = True
-
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [
@@ -145,6 +155,20 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+
+# WhiteNoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Security settings for production
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
