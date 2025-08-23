@@ -15,8 +15,67 @@ from .model_utils import save_model, load_model, update_metadata, list_models, l
 from .utils import (load_imdb_dataset, initialize_vectorizer, 
                    evaluate_model, generate_filename, transform_text, document_vector)
 
-# Global session storage (in production, use Django's session framework or database)
-ACTIVE_LEARNING_SESSIONS = {}
+# Session storage using file system for production compatibility on PythonAnywhere
+import pickle
+from pathlib import Path
+
+# Create a sessions directory for persistent storage
+SESSIONS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'active_learning_sessions')
+os.makedirs(SESSIONS_DIR, exist_ok=True)
+
+def get_session_data(request, session_id):
+    """Get active learning session data from file system"""
+    session_file = os.path.join(SESSIONS_DIR, f"{session_id}.pkl")
+    
+    if not os.path.exists(session_file):
+        return None
+    
+    try:
+        with open(session_file, 'rb') as f:
+            session_data = pickle.load(f)
+        
+        # Convert list data back to numpy arrays where needed
+        if 'X_vec' in session_data and isinstance(session_data['X_vec'], list):
+            session_data['X_vec'] = np.array(session_data['X_vec'])
+        if 'y' in session_data and isinstance(session_data['y'], list):
+            session_data['y'] = np.array(session_data['y'])
+        if 'y_test' in session_data and isinstance(session_data['y_test'], list):
+            session_data['y_test'] = np.array(session_data['y_test'])
+            
+        return session_data
+        
+    except (FileNotFoundError, pickle.PickleError, EOFError) as e:
+        print(f"Error loading session {session_id}: {e}")
+        return None
+
+def set_session_data(request, session_id, data):
+    """Set active learning session data to file system"""
+    session_file = os.path.join(SESSIONS_DIR, f"{session_id}.pkl")
+    
+    try:
+        # Convert numpy arrays to lists for better serialization
+        serializable_data = data.copy()
+        
+        if 'X_vec' in serializable_data and hasattr(serializable_data['X_vec'], 'tolist'):
+            serializable_data['X_vec'] = serializable_data['X_vec'].tolist()
+        if 'y' in serializable_data and hasattr(serializable_data['y'], 'tolist'):
+            serializable_data['y'] = serializable_data['y'].tolist()
+        if 'y_test' in serializable_data and hasattr(serializable_data['y_test'], 'tolist'):
+            serializable_data['y_test'] = serializable_data['y_test'].tolist()
+        
+        with open(session_file, 'wb') as f:
+            pickle.dump(serializable_data, f)
+            
+        return True
+        
+    except Exception as e:
+        print(f"Error saving session {session_id}: {e}")
+        return False
+
+def session_exists(request, session_id):
+    """Check if session exists"""
+    session_file = os.path.join(SESSIONS_DIR, f"{session_id}.pkl")
+    return os.path.exists(session_file)
 
 # Model directory configuration
 MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models')
@@ -175,12 +234,15 @@ def load_pretrained_model(request):
         # Create new active learning session
         session_id = f"pretrained_{int(time.time())}"
         
-        # Load dataset - use optimized loading for LDA
+        # Load dataset with performance optimizations
+        from .utils import ACTIVE_LEARNING_SAMPLE_SIZE, INITIAL_LABELED_SIZE
+        
         if model_type == 'lda':
             from .utils import LDA_SAMPLE_SIZE
             X, y = load_imdb_dataset(sample_size=LDA_SAMPLE_SIZE)
         else:
-            X, y = load_imdb_dataset()
+            # Use reduced dataset size for better performance on PythonAnywhere
+            X, y = load_imdb_dataset(sample_size=ACTIVE_LEARNING_SAMPLE_SIZE)
             
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
@@ -188,21 +250,21 @@ def load_pretrained_model(request):
         X_vec = transform_text(X_train, vectorizer, model_type)
         
         # Split into labeled and unlabeled pools for active learning
-        initial_size = 100  # You can make this configurable from frontend if needed
+        initial_size = min(INITIAL_LABELED_SIZE, len(X_train) // 4)  # Optimized initial size
         indices = np.random.permutation(len(X_train))
         labeled_indices = indices[:initial_size].tolist()
         unlabeled_indices = indices[initial_size:].tolist()
         
-        # Store session
-        ACTIVE_LEARNING_SESSIONS[session_id] = {
+        # Store session data
+        session_data = {
             'model_type': model_type,
             'strategy': 'uncertainty',  # Default strategy
             'batch_size': 5,  # Default batch size
             'vectorizer': vectorizer,
-            'X_text': X_train.values,
+            'X_text': X_train.values.tolist(),
             'X_vec': X_vec,
             'y': y_train.values,
-            'X_test': X_test.values,  # Store test features separately
+            'X_test': X_test.values.tolist(),  # Store test features separately
             'y_test': y_test.values,
             'labeled_indices': labeled_indices,
             'unlabeled_indices': unlabeled_indices,
@@ -214,10 +276,12 @@ def load_pretrained_model(request):
             'pretrained': True  # Flag to indicate this is a pretrained model
         }
         
+        set_session_data(request, session_id, session_data)
+        
         return JsonResponse({
             'status': 'success',
             'session_id': session_id,
-            'accuracy': ACTIVE_LEARNING_SESSIONS[session_id]['history']['accuracy'][0],
+            'accuracy': session_data['history']['accuracy'][0],
             'message': 'Pretrained model loaded successfully'
         })
         
@@ -267,17 +331,24 @@ def start_active_learning(request):
         batch_size = int(params.get('batch_size', 5))
         initial_size = int(params.get('initial_size', 100))
         
-        # Load dataset - use optimized loading for LDA
+        # Load dataset with performance optimizations for PythonAnywhere
+        from .utils import ACTIVE_LEARNING_SAMPLE_SIZE, INITIAL_LABELED_SIZE
+        
         if model_type == 'lda':
             from .utils import LDA_SAMPLE_SIZE
             X, y = load_imdb_dataset(sample_size=LDA_SAMPLE_SIZE)
         else:
-            X, y = load_imdb_dataset()
+            # Use reduced dataset size for better performance on PythonAnywhere
+            X, y = load_imdb_dataset(sample_size=ACTIVE_LEARNING_SAMPLE_SIZE)
             
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         # Initialize vectorizer
         vectorizer, X_vec = initialize_vectorizer(model_type, X_train)
+        
+        # Create initial labeled pool with stratified sampling for better balance
+        # Use optimized initial size
+        initial_size = min(INITIAL_LABELED_SIZE, len(X_train) // 4)  # Don't use more than 25% of data
         
         # Create initial labeled pool with stratified sampling for better balance
         sss = StratifiedShuffleSplit(n_splits=1, test_size=(len(X_train) - initial_size) / len(X_train), random_state=42)
@@ -291,15 +362,15 @@ def start_active_learning(request):
         clf.fit(X_vec[labeled_indices], y_train.iloc[labeled_indices])
         
         # Store session
-        ACTIVE_LEARNING_SESSIONS[session_id] = {
+        session_data = {
             'model_type': model_type,
             'strategy': strategy,
             'batch_size': batch_size,
             'vectorizer': vectorizer,
-            'X_text': X_train.values,
+            'X_text': X_train.values.tolist(),
             'X_vec': X_vec,
             'y': y_train.values,
-            'X_test': X_test.values,  # Store test features separately
+            'X_test': X_test.values.tolist(),  # Store test features separately
             'y_test': y_test.values,
             'labeled_indices': labeled_indices.tolist(),
             'unlabeled_indices': unlabeled_indices.tolist(),
@@ -311,10 +382,12 @@ def start_active_learning(request):
             'pretrained': False
         }
         
+        set_session_data(request, session_id, session_data)
+        
         return JsonResponse({
             'status': 'success',
             'session_id': session_id,
-            'initial_accuracy': ACTIVE_LEARNING_SESSIONS[session_id]['history']['accuracy'][0]
+            'initial_accuracy': session_data['history']['accuracy'][0]
         })
         
     except Exception as e:
@@ -330,10 +403,10 @@ def get_next_batch(request):
         params = json.loads(request.body)
         session_id = params.get('session_id', 'default')
         
-        if session_id not in ACTIVE_LEARNING_SESSIONS:
+        if not session_exists(request, session_id):
             return JsonResponse({'error': 'Invalid session ID'}, status=400)
             
-        session = ACTIVE_LEARNING_SESSIONS[session_id]
+        session = get_session_data(request, session_id)
         
         # For pretrained models with no unlabeled samples
         if session.get('pretrained', False) and len(session['unlabeled_indices']) == 0:
@@ -375,6 +448,9 @@ def get_next_batch(request):
             'sample_indices': sample_indices
         }
         
+        # Save updated session data
+        set_session_data(request, session_id, session)
+        
         return JsonResponse({
             'status': 'success',
             'samples': samples,
@@ -395,10 +471,10 @@ def submit_labels(request):
         session_id = params.get('session_id', 'default')
         labels = params.get('labels', {})
         
-        if session_id not in ACTIVE_LEARNING_SESSIONS:
+        if not session_exists(request, session_id):
             return JsonResponse({'error': 'Invalid session ID'}, status=400)
             
-        session = ACTIVE_LEARNING_SESSIONS[session_id]
+        session = get_session_data(request, session_id)
         
         if 'current_batch' not in session:
             return JsonResponse({'error': 'No active batch'}, status=400)
@@ -446,6 +522,9 @@ def submit_labels(request):
             session['labeled_indices'] = list(range(len(session['X_text'])))
             session['unlabeled_indices'] = []
         
+        # Save updated session data
+        set_session_data(request, session_id, session)
+        
         return JsonResponse({
             'status': 'success',
             'accuracy': acc,
@@ -465,10 +544,10 @@ def learning_progress(request, session_id='default'):
     if request.method != 'GET':
         return JsonResponse({'error': 'GET method required'}, status=400)
         
-    if session_id not in ACTIVE_LEARNING_SESSIONS:
+    if not session_exists(request, session_id):
         return JsonResponse({'error': 'Invalid session ID'}, status=400)
         
-    session = ACTIVE_LEARNING_SESSIONS[session_id]
+    session = get_session_data(request, session_id)
     return JsonResponse({
         'status': 'success',
         'history': session['history'],

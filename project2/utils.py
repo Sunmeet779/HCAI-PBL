@@ -9,12 +9,16 @@ from gensim.models import Word2Vec
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
-# LDA Performance Settings - adjust these for speed vs accuracy tradeoff
+# LDA Performance Settings - Optimized for PythonAnywhere
 LDA_FAST_MODE = True  # Set to False for higher accuracy, True for faster training
-LDA_SAMPLE_SIZE = 10000 if LDA_FAST_MODE else None  # Smaller dataset for faster training
-LDA_MAX_FEATURES = 800 if LDA_FAST_MODE else 2000   # Vocabulary size
-LDA_N_COMPONENTS = 15 if LDA_FAST_MODE else 30      # Number of topics
+LDA_SAMPLE_SIZE = 5000 if LDA_FAST_MODE else None   # Smaller dataset for faster training (reduced from 10000)
+LDA_MAX_FEATURES = 500 if LDA_FAST_MODE else 2000   # Vocabulary size (reduced from 800)
+LDA_N_COMPONENTS = 10 if LDA_FAST_MODE else 30      # Number of topics (reduced from 15)
 LDA_MAX_ITER = 2 if LDA_FAST_MODE else 5            # Training iterations
+
+# Active Learning Performance Settings
+ACTIVE_LEARNING_SAMPLE_SIZE = 8000  # Reduced dataset size for active learning
+INITIAL_LABELED_SIZE = 50            # Reduced from default 100
 
 MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models')
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'IMDB Dataset.csv')
