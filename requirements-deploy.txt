@@ -34,3 +34,4 @@ tzdata==2025.2
 torch==2.8.0
 gunicorn==23.0.0
 whitenoise==6.9.0
+mysqlclient
