@@ -42,3 +42,4 @@ smart-open==6.4.0
 palmerpenguins==0.1.4
 gosdt==1.0.4
 graphviz==0.20.1
+mysqlclient
