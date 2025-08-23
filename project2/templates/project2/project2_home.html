@@ -615,7 +615,6 @@
           const response = await fetch(`/project2/train-baseline/${modelType}/`, {
             method: "POST",
             headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
               "Content-Type": "application/json",
             },
           });
@@ -962,7 +961,6 @@
           const response = await fetch("/project2/active-learning/start/", {
             method: "POST",
             headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -1034,7 +1032,6 @@
             {
               method: "POST",
               headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
@@ -1154,7 +1151,6 @@
           const response = await fetch("/project2/active-learning/submit-labels/", {
             method: "POST",
             headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -1198,7 +1194,6 @@
           const response = await fetch("/project2/active-learning/submit-labels/", {
             method: "POST",
             headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -1395,24 +1390,6 @@
           alertDiv.classList.add("translate-x-full", "opacity-0");
           setTimeout(() => alertDiv.remove(), 300);
         });
-      }
-
-      // Get CSRF token from cookies
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-          const cookies = document.cookie.split(";");
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === name + "=") {
-              cookieValue = decodeURIComponent(
-                cookie.substring(name.length + 1)
-              );
-              break;
-            }
-          }
-        }
-        return cookieValue;
       }
     </script>
   </body>

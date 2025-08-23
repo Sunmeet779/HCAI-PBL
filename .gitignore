@@ -172,3 +172,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Active Learning Sessions (temporary files)
+active_learning_sessions/
