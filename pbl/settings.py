@@ -84,11 +84,16 @@ WSGI_APPLICATION = "pbl.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '/cloudsql/hcaiproject:europe-west1:sqlcloud',  # connection name
+        'PORT': '3306',
+        'NAME': 'hcai_db',        # database name you created
+        'USER': 'hcai_admin',     # Cloud SQL user
+        'PASSWORD': 'SanikaSunmeet11',  # the password you set
     }
 }
+
 
 
 # Password validation
