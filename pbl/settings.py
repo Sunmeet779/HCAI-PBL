@@ -170,6 +170,10 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://hcai-pbl-production.up.railway.app",
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
