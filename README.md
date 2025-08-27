@@ -1,6 +1,10 @@
 # Human-Centeric AI — Project-Based Learning (HCAI-PBL)
 
-A Django-based web application demonstrating various human-centric AI techniques and methodologies through interactive implementations.
+---
+
+## 🚀 Deployed Project
+
+Check out the deployed project here: [https://hcai-pbl-production.up.railway.app/](https://hcai-pbl-production.up.railway.app/)
 
 ---
 
@@ -96,7 +100,13 @@ The project is structured as a collection of five Django applications, each focu
 
 To run the project locally, follow these steps:
 
-### 1. Create a Virtual Environment:
+### 1. Clone the Repository:
+```bash
+git clone https://github.com/Sunmeet779/HCAI-PBL.git
+cd HCAI-PBL
+```
+
+### 2. Create a Virtual Environment:
 ```bash
 python -m venv .venv
 # Windows
@@ -105,18 +115,17 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 2. Install Dependencies:
+### 3. Install Dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-> **Note:** The requirements.txt file in the repository root lists all dependencies.
 
-### 3. Apply Database Migrations:
+### 4. Apply Database Migrations:
 ```bash
 python manage.py migrate
 ```
 
-### 4. Run the Development Server:
+### 5. Run the Development Server:
 ```bash
 python manage.py runserver
 ```
