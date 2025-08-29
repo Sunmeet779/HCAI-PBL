@@ -100,6 +100,14 @@ The project is structured as a collection of five Django applications, each focu
 
 To run the project locally, follow these steps:
 
+### Prerequisite: Python Version
+
+This project requires **Python 3.10 or newer**.  
+You can check your Python version with:
+```bash
+python --version
+```
+
 ### 1. Clone the Repository:
 ```bash
 git clone https://github.com/Sunmeet779/HCAI-PBL.git
