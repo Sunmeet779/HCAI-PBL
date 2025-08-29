@@ -288,7 +288,7 @@
             >
               <i class="fas fa-rocket mr-2"></i> Start Active Learning
             </button>
-            <div class="text-xs text-gray-500">
+            <div class="text-xs text-gray-500" id="al-status-message">
               <i class="fas fa-info-circle mr-1"></i> 
               Complete Task 1 first to enable Active Learning
             </div>
@@ -641,6 +641,8 @@
             startAlBtn.disabled = false;
             startAlBtn.parentElement.querySelector('.text-xs').innerHTML = 
               '<i class="fas fa-check-circle mr-1 text-green-500"></i> Ready to start Active Learning';
+             startAlBtn.parentElement.querySelector('.text-xs').innerHTML = 
+               '<i class="fas fa-check-circle mr-1 text-green-500"></i> Ready to start Active Learning<br><span class="text-blue-500">Please wait a moment, it might take some time.</span>';
             
             showAlert("Baseline model trained successfully! You can now start Active Learning.", "success");
           } else {
@@ -944,7 +946,7 @@
       // Task 2: Start active learning session
       async function startActiveLearning() {
         if (baselineAccuracy === null) {
-          showAlert("Please complete Task 1 (Baseline Training) first!", "warning");
+          document.getElementById("al-status-message").innerHTML = '<i class="fas fa-info-circle mr-1"></i> Complete Task 1 first to enable Active Learning';
           return;
         }
 
@@ -953,9 +955,10 @@
         const initialPool = document.getElementById("initial-pool").value;
         const startBtn = document.getElementById("start-al");
 
-        const originalBtnContent = startBtn.innerHTML;
-        startBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Starting AL...';
-        startBtn.disabled = true;
+  const originalBtnContent = startBtn.innerHTML;
+  startBtn.innerHTML = '<i class="fas fa-spinner loading-spinner mr-2"></i> Starting AL...';
+  startBtn.disabled = true;
+  document.getElementById("al-status-message").innerHTML = '<span class="text-blue-500"><i class="fas fa-spinner loading-spinner mr-1"></i> Please wait a moment, it might take some time.</span>';
 
         try {
           const response = await fetch("/project2/active-learning/start/", {
@@ -1010,6 +1013,7 @@
         } finally {
           startBtn.innerHTML = originalBtnContent;
           startBtn.disabled = false;
+          document.getElementById("al-status-message").innerHTML = '<i class="fas fa-info-circle mr-1"></i> Ready to start Active Learning';
         }
       }
 
