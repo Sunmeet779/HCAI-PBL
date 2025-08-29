@@ -109,28 +109,32 @@ cd HCAI-PBL
 ### 2. Create a Virtual Environment:
 ```bash
 python -m venv .venv
+```
+
+### 3. Activate the Virtual Environment:
+```bash
 # Windows
 .venv\Scripts\activate
 # macOS/Linux
 source .venv/bin/activate
 ```
 
-### 3. Install Dependencies:
+### 4. Install Dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Apply Database Migrations:
+### 5. Apply Database Migrations:
 ```bash
 python manage.py migrate
 ```
 
-### 5. Run the Development Server:
+### 6. Run the Development Server:
 ```bash
-python manage.py runserver
+python manage.py runserver 8050
 ```
 
-Access the application at [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+Access the application at [http://127.0.0.1:8050/](http://127.0.0.1:8050/).
 
 ---
 
